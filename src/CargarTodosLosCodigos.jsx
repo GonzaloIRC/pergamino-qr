@@ -3,7 +3,7 @@ import { doc, setDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
 function CargarTodosLosCodigos() {
-  const isLocalhost = window.location.hostname === "localhost";
+  const isLocalhost = typeof window !== "undefined" && window.location.hostname === "localhost";
   if (!isLocalhost) return null;
 
   const codes = Array.from({ length: 20 }, (_, i) => `Piscosour${String(i + 1).padStart(2, "0")}`);

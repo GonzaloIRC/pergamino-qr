@@ -1,153 +1,105 @@
-
-import { useEffect, useState } from "react";
-import AdminCodes from "./AdminCodes";
-import { Html5QrcodeScanner } from "html5-qrcode";
-import logo from "./assets/LOGO.png";
-import "./App.css";
-import CargarTodosLosCodigos from "./CargarTodosLosCodigos";
-
-// Firebase
+import React, { useEffect, useState } from "react";
+import { collection, doc, getDoc, onSnapshot, setDoc, deleteDoc } from "firebase/firestore";
 import { db } from "./firebase";
-import {
-  collection,
-  onSnapshot,
-  addDoc,
-  serverTimestamp,
-  query,
-  where,
-  getDocs,
-  deleteDoc,
-  doc
-} from "firebase/firestore";
+import QrReader from "react-qr-reader";
+import CargarTodosLosCodigos from "./CargarTodosLosCodigos";
+import "./App.css";
 
 function App() {
+  const [scannerActive, setScannerActive] = useState(true);
+  const [scanResult, setScanResult] = useState(null);
+  const [scanStatus, setScanStatus] = useState("📡 Esperando código...");
   const [validCodes, setValidCodes] = useState([]);
-  const [result, setResult] = useState("📡 Esperando código...");
-  const [scanned, setScanned] = useState("");
-  const [lastScanTime, setLastScanTime] = useState(0);
-  const [lastCode, setLastCode] = useState("");
+  const [showCodes, setShowCodes] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "codigos"), (querySnapshot) => {
-      const codes = querySnapshot.docs.map((doc) => doc.data().codigo);
+    const unsubscribe = onSnapshot(collection(db, "codigos"), (snapshot) => {
+      const codes = snapshot.docs.map((doc) => doc.id);
       setValidCodes(codes);
     });
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (validCodes.length === 0) return;
+  const handleScan = async (value) => {
+    if (value && scannerActive) {
+      setScannerActive(false); // Detiene el lector
+      const scannedCode = value.trim();
+      setScanResult(scannedCode);
+      setScanStatus("⏳ Procesando...");
 
-    const scanner = new Html5QrcodeScanner("reader", {
-      fps: 10,
-      qrbox: { width: 250, height: 250 }
-    });
+      try {
+        const ref = doc(db, "codigos", scannedCode);
+        const docSnap = await getDoc(ref);
 
-    scanner.render(
-      async (text) => {
-        const now = Date.now();
-        if (text === lastCode && now - lastScanTime < 5000) {
-          return;
-        }
-        setLastCode(text);
-        setLastScanTime(now);
-
-        setScanned(text);
-        const codigo = text.trim();
-
-        const snapshot = await getDocs(query(collection(db, "codigos"), where("codigo", "==", codigo)));
-
-        if (!snapshot.empty) {
-          const docToDelete = snapshot.docs[0];
-          const docId = docToDelete.id;
-
-          const historialSnap = await getDocs(
-            query(
-              collection(db, "historial"),
-              where("codigo", "==", codigo),
-              where("estado", "==", "válido")
-            )
-          );
-
-          if (historialSnap.empty) {
-            setResult(`✅ Código válido: ${codigo}`);
-            document.getElementById("result").style.backgroundColor = "#e4f6e1";
-            document.getElementById("result").style.borderColor = "#5eac5e";
-            document.getElementById("result").style.color = "#235f23";
-
-            await addDoc(collection(db, "historial"), {
-              codigo,
-              fecha: serverTimestamp(),
-              estado: "válido"
-            });
-
-            await deleteDoc(doc(db, "codigos", docId));
-            setValidCodes(validCodes.filter((c) => c !== codigo));
-          } else {
-            setResult(`❌ Este código ya fue usado: ${codigo}`);
-            document.getElementById("result").style.backgroundColor = "#ffe6e6";
-            document.getElementById("result").style.borderColor = "#e76c6c";
-            document.getElementById("result").style.color = "#922222";
-
-            await addDoc(collection(db, "historial"), {
-              codigo,
-              fecha: serverTimestamp(),
-              estado: "inválido"
-            });
-
-            await deleteDoc(doc(db, "codigos", docId));
-            setValidCodes(validCodes.filter((c) => c !== codigo));
-          }
-        } else {
-          setResult(`❌ Código inválido: ${codigo}`);
-          document.getElementById("result").style.backgroundColor = "#ffe6e6";
-          document.getElementById("result").style.borderColor = "#e76c6c";
-          document.getElementById("result").style.color = "#922222";
-
-          await addDoc(collection(db, "historial"), {
-            codigo,
-            fecha: serverTimestamp(),
-            estado: "inválido"
+        if (!docSnap.exists()) {
+          setScanStatus("❌ Código inválido");
+          await setDoc(doc(db, "historial", Date.now().toString()), {
+            codigo: scannedCode,
+            estado: "inválido",
+            fecha: new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" })
           });
+        } else {
+          await setDoc(doc(db, "historial", Date.now().toString()), {
+            codigo: scannedCode,
+            estado: "válido",
+            fecha: new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" })
+          });
+          await deleteDoc(ref);
+          setScanStatus("✅ Código válido y registrado");
         }
-      },
-      (error) => {}
-    );
-
-    return () => {
-      document.getElementById("reader").innerHTML = "";
-    };
-  }, [validCodes]);
-
-  const isLocalhost = window.location.hostname === "localhost";
+      } catch (error) {
+        setScanStatus("⚠️ Error al procesar el código");
+        console.error("Error de escaneo:", error);
+      }
+    }
+  };
 
   return (
     <div className="App">
-      <AdminCodes />
-      <img src={logo} alt="Logo Pergamino" className="logo" />
+      <img src="logo.png" alt="Logo" className="logo" />
       <h1>📷 Validador QR - Pergamino</h1>
-      <div id="reader"></div>
-      <p id="result">{result}</p>
-      <details style={{
-        marginTop: "2em",
-        background: "#f9f9f9",
-        color: "#222",
-        padding: "1em",
-        borderRadius: "8px",
-        maxWidth: "95vw",
-        textAlign: "left"
-      }}>
-        <summary style={{ cursor: "pointer", fontWeight: "bold", fontSize: "1em" }}>
-          🔍 Ver códigos válidos restantes
-        </summary>
-        <ul style={{ marginTop: "1em" }}>
-          {validCodes.map((code, index) => (
-            <li key={index}>{code}</li>
-          ))}
-        </ul>
-      </details>
 
-      {isLocalhost && <CargarTodosLosCodigos />}
+      {scannerActive ? (
+        <QrReader
+          onResult={(result, error) => {
+            if (!!result) {
+              handleScan(result?.text);
+            }
+          }}
+          constraints={{ facingMode: "environment" }}
+          containerStyle={{ width: "100%" }}
+        />
+      ) : (
+        <button className="reactivar" onClick={() => {
+          setScanResult(null);
+          setScanStatus("📡 Esperando código...");
+          setScannerActive(true);
+        }}>
+          🔄 Reactivar escáner
+        </button>
+      )}
+
+      <div className="status">
+        <strong>{scanStatus}</strong>
+        {scanResult && <p>📎 Valor escaneado: {scanResult}</p>}
+      </div>
+
+      <button className="mostrar-validos" onClick={() => setShowCodes(!showCodes)}>
+        {showCodes ? "🔽 Ocultar códigos válidos" : "🔼 Mostrar códigos válidos"}
+      </button>
+
+      {showCodes && (
+        <div className="codigos-validos">
+          <p><strong>Códigos válidos:</strong></p>
+          <ul>
+            {validCodes.map((code) => (
+              <li key={code}>{code}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <CargarTodosLosCodigos />
     </div>
   );
 }
