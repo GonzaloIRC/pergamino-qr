@@ -42,6 +42,8 @@ function App() {
     });
     scanner.render(
       async (text) => {
+        console.log('Escaneado:', text);
+        console.log('Códigos válidos:', validCodes);
         if (validCodes.includes(text)) {
           setResult(`✅ Código válido: ${text}`);
           document.getElementById("result").style.backgroundColor = "#e4f6e1";
