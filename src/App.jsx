@@ -61,13 +61,14 @@ function App() {
 
       {scannerActive ? (
         <QrReader
-          onResult={(result, error) => {
-            if (!!result) {
-              handleScan(result?.text);
-            }
+          delay={500}
+          onScan={(data) => {
+            if (data) handleScan(data);
           }}
-          constraints={{ facingMode: "environment" }}
-          containerStyle={{ width: "100%" }}
+          onError={(err) => {
+            console.error("Error de QR:", err);
+          }}
+          style={{ width: "100%" }}
         />
       ) : (
         <button className="reactivar" onClick={() => {
