@@ -1,9 +1,6 @@
-// uploadcodes.js
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, setDoc, doc } from "firebase/firestore";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
+import codes from "./data/codigos.js";
 
 // Configuración de Firebase
 const firebaseConfig = {
@@ -20,29 +17,19 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Resolver ruta al archivo JSON
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const filePath = path.join(__dirname, "data", "valid-codes.json");
-
-// Leer y parsear JSON
-const rawData = fs.readFileSync(filePath, "utf-8");
-const data = JSON.parse(rawData);
-
-// Subir los datos
-async function subirCodigos() {
-  for (const categoria in data) {
-    for (const item of data[categoria]) {
-      const codigo = item.codigo;
-      await setDoc(doc(db, "codigos", codigo), {
-        codigo,
-        categoria,
-        usado: item.usado ?? false
+// Subir los códigos
+const uploadCodes = async () => {
+  for (const codigo of codes) {
+    if (typeof codigo === "string" && codigo.trim() !== "") {
+      const ref = doc(db, "codigos", codigo.trim());
+      await setDoc(ref, {
+        codigo: codigo.trim(),
+        categoria: "Piscosour",
+        usado: false
       });
-      console.log(`✅ Subido: ${codigo} (${categoria})`);
+      console.log(`✅ Subido: ${codigo}`);
     }
   }
-  console.log("🎉 Todos los códigos fueron subidos a Firestore.");
-}
+};
 
-subirCodigos().catch(console.error);
+uploadCodes();
