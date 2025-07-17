@@ -128,19 +128,24 @@ function App() {
       <h1>📷 Validador QR - Pergamino</h1>
       <div id="reader"></div>
       <p id="result">{result}</p>
-      <div
-        style={{
-          marginTop: "2em",
-          background: "#f9f9f9",
-          color: "#222",
-          padding: "1em",
-          borderRadius: "8px"
-        }}
-      >
-        <strong>Valor escaneado:</strong> {scanned}
-        <br />
-        <strong>Códigos válidos:</strong> {JSON.stringify(validCodes)}
-      </div>
+      <details style={{
+        marginTop: "2em",
+        background: "#f9f9f9",
+        color: "#222",
+        padding: "1em",
+        borderRadius: "8px",
+        maxWidth: "95vw",
+        textAlign: "left"
+      }}>
+        <summary style={{ cursor: "pointer", fontWeight: "bold", fontSize: "1em" }}>
+          🔍 Ver códigos válidos restantes
+        </summary>
+        <ul style={{ marginTop: "1em" }}>
+          {validCodes.map((code, index) => (
+            <li key={index}>{code}</li>
+          ))}
+        </ul>
+      </details>
 
       {isLocalhost && <CargarTodosLosCodigos />}
     </div>

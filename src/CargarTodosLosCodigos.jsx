@@ -1,3 +1,5 @@
+const isLocalhost = window.location.hostname === "localhost";
+if (!isLocalhost) return null; // Oculta todo el botón en producción
 import React from "react";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "./firebase";
