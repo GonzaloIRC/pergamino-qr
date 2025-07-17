@@ -3,6 +3,7 @@ import { doc, setDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
 function CargarTodosLosCodigos() {
+  // ✅ Esta validación debe ir DENTRO del componente
   const isLocalhost =
     typeof window !== "undefined" && window.location.hostname === "localhost";
   if (!isLocalhost) return null;
@@ -12,7 +13,7 @@ function CargarTodosLosCodigos() {
   const subirTodos = async () => {
     for (const code of codes) {
       try {
-        const ref = doc(db, "codigos", code); // Usa el código como ID
+        const ref = doc(db, "codigos", code);
         await setDoc(ref, {
           codigo: code,
           categoria: "Piscosour",
