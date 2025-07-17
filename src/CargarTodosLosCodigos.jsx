@@ -3,7 +3,8 @@ import { doc, setDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
 function CargarTodosLosCodigos() {
-  const isLocalhost = typeof window !== "undefined" && window.location.hostname === "localhost";
+  const isLocalhost =
+    typeof window !== "undefined" && window.location.hostname === "localhost";
   if (!isLocalhost) return null;
 
   const codes = Array.from({ length: 20 }, (_, i) => `Piscosour${String(i + 1).padStart(2, "0")}`);
@@ -11,7 +12,7 @@ function CargarTodosLosCodigos() {
   const subirTodos = async () => {
     for (const code of codes) {
       try {
-        const ref = doc(db, "codigos", code);
+        const ref = doc(db, "codigos", code); // Usa el código como ID
         await setDoc(ref, {
           codigo: code,
           categoria: "Piscosour",
@@ -22,7 +23,7 @@ function CargarTodosLosCodigos() {
         console.error(`❌ Error al subir ${code}:`, error);
       }
     }
-    alert("Todos los códigos han sido subidos sin duplicación");
+    alert("✅ Todos los códigos han sido subidos sin duplicación");
   };
 
   return (
