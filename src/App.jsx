@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import AdminCodes from "./AdminCodes";
 import { Html5QrcodeScanner } from "html5-qrcode";
@@ -39,13 +40,13 @@ function App() {
 
     const scanner = new Html5QrcodeScanner("reader", {
       fps: 10,
-      qrbox: 250
+      qrbox: { width: 250, height: 250 }
     });
 
     scanner.render(
       async (text) => {
         const now = Date.now();
-        if (text === lastCode && now - lastScanTime < 3000) {
+        if (text === lastCode && now - lastScanTime < 5000) {
           return;
         }
         setLastCode(text);
@@ -118,6 +119,8 @@ function App() {
     };
   }, [validCodes]);
 
+  const isLocalhost = window.location.hostname === "localhost";
+
   return (
     <div className="App">
       <AdminCodes />
@@ -129,6 +132,7 @@ function App() {
         style={{
           marginTop: "2em",
           background: "#f9f9f9",
+          color: "#222",
           padding: "1em",
           borderRadius: "8px"
         }}
@@ -138,7 +142,7 @@ function App() {
         <strong>Códigos válidos:</strong> {JSON.stringify(validCodes)}
       </div>
 
-      <CargarTodosLosCodigos />
+      {isLocalhost && <CargarTodosLosCodigos />}
     </div>
   );
 }

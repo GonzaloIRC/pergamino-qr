@@ -1,51 +1,92 @@
+
+/* Estilo general */
 body {
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #4B5320; /* verde oliva oscuro */
-  color: #ffffff;
-  text-align: center;
-
-  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgA..."); /* <- se reemplaza por base64 del logo */
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: 60%;
-  background-attachment: fixed;
+  font-family: Arial, sans-serif;
+  background-color: #5d602b;
+  color: #fff;
 }
 
 .App {
-  padding-top: 50px;
-  animation: fadeIn 1.2s ease-in-out;
+  text-align: center;
+  padding: 1.5em;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
+/* Logo */
+.logo {
+  width: 120px;
+  margin-bottom: 1em;
+}
+
+/* Título */
 h1 {
-  font-size: 2.5rem;
-  margin-bottom: 40px;
-  color: #fff;
-  text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
+  font-size: 2em;
+  margin-bottom: 0.5em;
 }
 
-#reader {
-  margin: auto;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  transition: transform 0.3s ease;
-  background-color: #ffffff;
-}
-
-#reader:hover {
-  transform: scale(1.02);
-}
-
+/* Resultado */
 #result {
-  margin-top: 30px;
-  font-size: 1.2rem;
-  color: #fff;
+  margin-top: 1em;
+  padding: 1em;
+  border-radius: 10px;
+  border: 2px solid transparent;
   font-weight: bold;
-  animation: fadeIn 1.5s ease-out;
+  transition: all 0.3s ease;
+  max-width: 90vw;
 }
 
-@keyframes fadeIn {
-  0% { opacity: 0; transform: translateY(20px); }
-  100% { opacity: 1; transform: translateY(0); }
+/* Lector QR */
+#reader {
+  margin: 1em auto;
+  width: 320px;
+  max-width: 95vw;
+  background-color: #fff;
+  padding: 1em;
+  border-radius: 8px;
+}
+
+/* Botón */
+button {
+  background-color: #1f1f1f;
+  color: #fff;
+  border: none;
+  padding: 0.6em 1.2em;
+  margin-top: 1em;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+button:hover {
+  background-color: #333;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1.4em;
+  }
+
+  .logo {
+    width: 90px;
+  }
+
+  #reader {
+    width: 95vw;
+    padding: 0.5em;
+  }
+
+  #result {
+    font-size: 0.95em;
+    padding: 0.8em;
+  }
+
+  button {
+    font-size: 0.9em;
+    padding: 0.5em 1em;
+  }
 }
