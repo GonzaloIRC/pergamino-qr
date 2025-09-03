@@ -21,11 +21,23 @@ export default function AnonymousLogin({ onDone }) {
         try {
           userCredential = await signInWithEmailAndPassword(auth, email, password);
         } catch (error) {
-          // Si el usuario no existe, intenta crearlo
-          if (error.code === 'auth/user-not-found') {
-            console.log('Usuario no encontrado, intentando crear uno nuevo...');
+          console.log('Error al iniciar sesión:', error.code);
+          
+          // Si el usuario no existe o credenciales inválidas, intentamos crear un nuevo usuario
+          if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+            console.log('Usuario no encontrado o credenciales inválidas, intentando crear uno nuevo...');
             setMode('signup');
-            throw error; // Propagar para manejar en catch externo
+            
+            // En lugar de propagar el error, intentamos crear un usuario directamente
+            try {
+              userCredential = await createUserWithEmailAndPassword(auth, email, password);
+              console.log('Usuario creado exitosamente');
+              // Si llega aquí, el usuario se creó con éxito
+              return userCredential;
+            } catch (createError) {
+              console.error('Error al crear usuario:', createError);
+              throw createError; // Ahora sí propagamos el error
+            }
           } else {
             throw error;
           }
@@ -43,13 +55,20 @@ export default function AnonymousLogin({ onDone }) {
       
       // Mensajes de error personalizados
       let errorMessage = error.message || String(error);
+      
       if (error.code === 'auth/user-not-found') {
-        errorMessage = 'Usuario no encontrado. Intenta registrarte primero.';
+        errorMessage = 'Usuario no encontrado. Se intentará registrar automáticamente.';
+        setMode('signup');
       } else if (error.code === 'auth/wrong-password') {
         errorMessage = 'Contraseña incorrecta. Inténtalo de nuevo.';
+      } else if (error.code === 'auth/invalid-credential') {
+        errorMessage = 'Credenciales inválidas. Se intentará registrar automáticamente.';
+        setMode('signup');
       } else if (error.code === 'auth/email-already-in-use') {
-        errorMessage = 'Este correo ya está registrado. Intenta iniciar sesión.';
+        errorMessage = 'Este correo ya está registrado. Intenta iniciar sesión con otra contraseña.';
         setMode('signin');
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = 'La contraseña es demasiado débil. Debe tener al menos 6 caracteres.';
       }
       
       Alert.alert(
@@ -65,7 +84,9 @@ export default function AnonymousLogin({ onDone }) {
     <View style={styles.container}>
       <Text style={styles.title}>Inicio de Sesión de Prueba</Text>
       <Text style={styles.subtitle}>
-        Usa estas credenciales para probar la aplicación
+        {mode === 'signup' 
+          ? "Crea una nueva cuenta para acceder"
+          : "Usa estas credenciales para probar la aplicación"}
       </Text>
       
       <View style={styles.inputContainer}>
@@ -106,6 +127,12 @@ export default function AnonymousLogin({ onDone }) {
           onPress={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
           color="#666"
         />
+      )}
+      
+      {mode === 'signin' && (
+        <Text style={styles.infoText}>
+          Si es la primera vez que usas esta cuenta, primero debes presionar "¿No tienes cuenta? Regístrate"
+        </Text>
       )}
       
       {onDone && (
@@ -164,5 +191,13 @@ const styles = StyleSheet.create({
   },
   backButtonContainer: {
     marginTop: 20
+  },
+  infoText: {
+    fontSize: 14,
+    fontStyle: 'italic',
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 10,
+    paddingHorizontal: 20
   }
 });
