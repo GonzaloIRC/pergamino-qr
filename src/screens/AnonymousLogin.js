@@ -1,10 +1,12 @@
 // src/screens/AnonymousLogin.js
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, Button, StyleSheet, ActivityIndicator, Alert, TextInput } from 'react-native';
 import { auth } from '../services/firebase/app';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { AuthContext } from '../context/AuthContext';
 
-export default function AnonymousLogin({ onDone }) {
+export default function AnonymousLogin({ onDone, navigation }) {
+  const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('guest@pergamino.test');
   const [password, setPassword] = useState('pergamino123');
@@ -48,8 +50,21 @@ export default function AnonymousLogin({ onDone }) {
       }
       
       console.log('Inicio de sesión exitoso:', userCredential.user.uid);
-      Alert.alert('Éxito', `Has iniciado sesión como ${email}`);
-      if (onDone) onDone();
+      Alert.alert('Éxito', `Has iniciado sesión como ${email}`, [
+        { 
+          text: 'OK', 
+          onPress: () => {
+            // Si tenemos navegación disponible, ir a MainTabs
+            if (navigation) {
+              navigation.replace('MainTabs');
+            } 
+            // De lo contrario, usar el callback onDone
+            else if (onDone) {
+              onDone();
+            }
+          } 
+        }
+      ]);
     } catch (error) {
       console.error('Error en inicio de sesión:', error);
       

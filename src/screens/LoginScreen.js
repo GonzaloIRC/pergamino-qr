@@ -45,7 +45,10 @@ export default function LoginScreen({ navigation }) {
 	};
 
 	if (showAnonymousLogin) {
-		return <AnonymousLogin onDone={() => setShowAnonymousLogin(false)} />;
+		return <AnonymousLogin 
+		  onDone={() => setShowAnonymousLogin(false)} 
+		  navigation={navigation}
+		/>;
 	}
 
 	return (
