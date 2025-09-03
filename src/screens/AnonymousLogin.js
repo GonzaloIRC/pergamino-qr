@@ -1,9 +1,10 @@
 // src/screens/AnonymousLogin.js
 import React, { useState, useContext } from 'react';
 import { View, Text, Button, StyleSheet, ActivityIndicator, Alert, TextInput } from 'react-native';
-import { auth } from '../services/firebase/app';
+import { auth, db } from '../services/firebase/app';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { AuthContext } from '../context/AuthContext';
+import { doc, setDoc } from 'firebase/firestore';
 
 export default function AnonymousLogin({ onDone, navigation }) {
   const { user } = useContext(AuthContext);
@@ -32,8 +33,29 @@ export default function AnonymousLogin({ onDone, navigation }) {
             
             // En lugar de propagar el error, intentamos crear un usuario directamente
             try {
+              // Crear el usuario en Firebase Auth
               userCredential = await createUserWithEmailAndPassword(auth, email, password);
-              console.log('Usuario creado exitosamente');
+              const uid = userCredential.user.uid;
+              console.log('Usuario creado exitosamente, UID:', uid);
+              
+              // Asignar rol 'cliente' en Firestore
+              await setDoc(doc(db, 'roles', uid), { role: 'cliente' });
+              console.log('Rol "cliente" asignado correctamente');
+              
+              // Crear perfil básico en colección 'clientes'
+              await setDoc(doc(db, 'clientes', uid), {
+                uid: uid,
+                email: email,
+                nombre: 'Invitado',
+                apellido: 'Prueba',
+                rut: '',
+                fechaRegistro: new Date().toISOString(),
+                puntos: 0,
+                categoria: 'cliente',
+                walletActivo: true
+              });
+              console.log('Perfil de cliente creado correctamente');
+              
               // Si llega aquí, el usuario se creó con éxito
               return userCredential;
             } catch (createError) {
