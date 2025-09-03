@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { RequireAuth, RequireRole } from './RouteGuards';
+import { AuthContext } from '../context/AuthContext';
 
 import Landing from '../screens/Landing';
 import Onboarding from '../screens/Onboarding';
@@ -23,8 +24,15 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function MainTabs() {
+  const { userRole } = useContext(AuthContext);
+  
+  // Determinar qué pestaña mostrar inicialmente según el rol
+  let initialRouteName = "Customer"; // Por defecto, mostrar la pestaña Cliente
+  
   return (
-    <Tab.Navigator>
+    <Tab.Navigator
+      initialRouteName={initialRouteName}
+    >
       <Tab.Screen
         name="Admin"
         component={RequireRole(['admin'], AdminDashboard)}
@@ -37,7 +45,7 @@ function MainTabs() {
       />
       <Tab.Screen
         name="Customer"
-        component={RequireRole(['customer'], CustomerDashboard)}
+        component={RequireRole(['cliente', 'customer'], CustomerDashboard)}
         options={{ tabBarLabel: 'Cliente', headerTitle: 'Mi Cuenta' }}
       />
     </Tab.Navigator>

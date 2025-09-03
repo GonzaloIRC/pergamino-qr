@@ -23,7 +23,7 @@ export function RequireRole(roles, Component) {
 		const { userRole, isAuthenticated, loading, logout } = useContext(AuthContext);
 		if (loading) return <Text>Cargando...</Text>;
 		if (!isAuthenticated) return <RequireAuth Component={Component} {...props} />;
-		if (!roles.includes(userRole || 'customer')) {
+		if (!roles.includes(userRole || 'cliente')) {
 			return (
 				<View style={{ padding: 24 }}>
 					<Text style={{ marginBottom: 12 }}>Acceso denegado: rol insuficiente.</Text>
