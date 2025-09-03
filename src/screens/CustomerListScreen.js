@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Card, Button, Searchbar, Chip, Menu, Divider } from 'react-native-paper';
 import { collection, query, getDocs, where, orderBy, limit } from 'firebase/firestore';
-import { db } from '../../firebase/firebaseConfig';
+import { db } from '../services/firebaseClient';
 
 /**
  * Pantalla de listado de clientes

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { Card, Button, IconButton, Divider, Dialog, Portal, TextInput } from 'react-native-paper';
 import { doc, getDoc, updateDoc, collection, query, where, orderBy, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase/firebaseConfig';
+import { db } from '../services/firebaseClient';
 import { AuthContext } from '../context/AuthContext';
 
 /**

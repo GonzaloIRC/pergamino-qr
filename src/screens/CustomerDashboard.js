@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Image } from 're
 import { Card, Button, Title, Divider } from 'react-native-paper';
 import { AuthContext } from '../context/AuthContext';
 import { doc, getDoc, collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
-import { db } from '../firebase/firebaseConfig';
+import { db } from '../services/firebaseClient';
 
 export default function CustomerDashboard() {
   const { user } = useContext(AuthContext);

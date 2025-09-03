@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Card, Button, Title, Paragraph, ActivityIndicator } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { collection, query, getDocs, where, orderBy, limit } from 'firebase/firestore';
-import { db } from '../firebase/firebaseConfig';
+import { db } from '../services/firebaseClient';
 
 export default function AdminDashboard() {
   const navigation = useNavigation();
