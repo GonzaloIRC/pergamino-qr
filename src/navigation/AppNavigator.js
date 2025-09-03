@@ -19,9 +19,6 @@ import Settings from '../screens/Settings';
 import Campaigns from '../screens/Campaigns';
 import Customers from '../screens/Customers';
 import Reports from '../screens/Reports';
-import TableManagementScreen from '../screens/TableManagementScreen';
-import TableDetailScreen from '../screens/TableDetailScreen';
-import TrackingTableSetup from '../screens/TrackingTableSetup';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -70,21 +67,6 @@ export default function AppNavigator() {
             <Stack.Screen name="Campaigns" component={RequireAuth(Campaigns)} />
             <Stack.Screen name="Customers" component={RequireAuth(Customers)} />
             <Stack.Screen name="Reports" component={RequireAuth(Reports)} />
-            <Stack.Screen 
-              name="TableManagement" 
-              component={RequireAuth(RequireRole(['admin', 'waiter'], TableManagementScreen))}
-              options={{ headerShown: false, title: "Gestión de Mesas" }}
-            />
-            <Stack.Screen 
-              name="TableDetail" 
-              component={RequireAuth(RequireRole(['admin', 'waiter'], TableDetailScreen))}
-              options={{ headerShown: false, title: "Detalle de Mesa" }}
-            />
-            <Stack.Screen 
-              name="TrackingTableSetup" 
-              component={RequireAuth(RequireRole(['admin'], TrackingTableSetup))}
-              options={{ title: "Configuración TrackingTable" }}
-            />
           </Stack.Navigator>
         </NavigationContainer>
       </PaperProvider>
