@@ -1,0 +1,22 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "Historial",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "dni", "order": "ASCENDING" },
+        { "fieldPath": "fecha", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "BeneficioSeriales",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "beneficioId", "order": "ASCENDING" },
+        { "fieldPath": "estado", "order": "ASCENDING" },
+        { "fieldPath": "creado", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

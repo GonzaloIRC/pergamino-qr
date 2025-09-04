@@ -1,4 +1,4 @@
-package com.gonzaloirc.pergaminoapp
+package com.pergamino.app
 
 import android.app.Application
 import android.content.res.Configuration
