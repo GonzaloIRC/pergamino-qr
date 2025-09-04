@@ -74,6 +74,7 @@ npx expo start
 - `docs/M1_ALCANCE.md`: Descripción detallada del alcance de M1
 - `docs/M1_PLAN_IMPLEMENTACION.md`: Plan de implementación para M1
 - `docs/M1_GUIA_TECNICA.md`: Guía técnica para desarrolladores
+- `AGENT_AUDIT.md`: Auditoría viva de seguridad y calidad del proyecto
 
 ## Seguridad
 - Implementadas reglas de seguridad en Firestore basadas en roles
