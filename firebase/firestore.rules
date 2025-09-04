@@ -1,9 +1,41 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // DEV ONLY (emulador): permitir todo
+    function isAuthed() { return request.auth != null; }
+
+    // Ajustes: lectura solo autenticada, escritura denegada por ahora
+    match /Ajustes/{doc} {
+      allow read: if isAuthed();
+      allow write: if false;
+    }
+
+    // Clientes: lectura y escritura autenticada (rol se gestiona en app)
+    match /Clientes/{dni} {
+      allow read: if isAuthed();
+      allow write: if isAuthed();
+    }
+
+    // Beneficios: solo lectura
+    match /Beneficios/{id} {
+      allow read: if isAuthed();
+      allow write: if false;
+    }
+
+    // BeneficioSeriales: lectura y escritura autenticada (canje, emision)
+    match /BeneficioSeriales/{serial} {
+      allow read: if isAuthed();
+      allow write: if isAuthed();
+    }
+
+    // Historial: lectura y escritura autenticada
+    match /Historial/{id} {
+      allow read: if isAuthed();
+      allow write: if isAuthed();
+    }
+
+    // Por defecto denegar
     match /{document=**} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
   }
 }
