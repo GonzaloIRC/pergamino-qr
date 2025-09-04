@@ -8,10 +8,21 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencias
 node_modules
 dist
 dist-ssr
 *.local
+
+# Archivos de entorno y secretos
+.env
+.env.*
+!.env.example
+serviceAccount*.json
+!serviceAccount*.example.json
+*credentials*.json
+*.secret*
+google*.json
 
 # Editor directories and files
 .vscode/*
