@@ -5,7 +5,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "usuarioId",
+          "fieldPath": "dni",
           "order": "ASCENDING"
         },
         {
@@ -15,7 +15,7 @@
       ]
     },
     {
-      "collectionGroup": "Historial",
+      "collectionGroup": "BeneficioSeriales",
       "queryScope": "COLLECTION",
       "fields": [
         {
@@ -23,36 +23,12 @@
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "fecha",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "BeneficioSeriales",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
           "fieldPath": "estado",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "createdAt",
+          "fieldPath": "creado",
           "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "BeneficioSeriales",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "serial",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "estado",
-          "order": "ASCENDING"
         }
       ]
     }

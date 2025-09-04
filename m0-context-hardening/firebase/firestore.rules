@@ -1,0 +1,47 @@
+rules_version = '2';
+
+// Estas reglas proporcionan un entorno de desarrollo seguro.  Sólo los
+// usuarios autenticados pueden leer los datos, y las escrituras están
+// restringidas a colecciones específicas según su propósito.  Ajusta estas
+// reglas antes de desplegar a producción para reflejar los controles de
+// autorización definitivos.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Comprueba si hay un usuario autenticado
+    function isAuthed() { return request.auth != null; }
+
+    // Ajustes: sólo lectura para usuarios autenticados
+    match /Ajustes/{doc} {
+      allow read: if isAuthed();
+      allow write: if false;
+    }
+
+    // Clientes: lectura y escritura autenticada
+    match /Clientes/{dni} {
+      allow read, write: if isAuthed();
+    }
+
+    // Beneficios: lectura autenticada, escritura restringida a rol admin
+    match /Beneficios/{id} {
+      allow read: if isAuthed();
+      allow write: if false; // modificar en M2 para rol admin
+    }
+
+    // BeneficioSeriales: lectura y escritura autenticada.  En M1 se verifica
+    // el estado del serial en el cliente antes de actualizar.
+    match /BeneficioSeriales/{serial} {
+      allow read: if isAuthed();
+      allow write: if isAuthed();
+    }
+
+    // Historial: registro de canjes y acumulaciones
+    match /Historial/{id} {
+      allow read, write: if isAuthed();
+    }
+
+    // Cualquier otro documento está denegado
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

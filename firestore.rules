@@ -1,84 +1,39 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Función para verificar si el usuario está autenticado
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-    
-    // Función para verificar si el usuario es admin
-    function isAdmin() {
-      return isAuthenticated() && request.auth.token.role == 'admin';
-    }
-    
-    // Función para verificar si el usuario es mesero
-    function isMesero() {
-      return isAuthenticated() && request.auth.token.role == 'mesero';
-    }
-    
-    // Función para verificar si el usuario es cliente
-    function isCliente() {
-      return isAuthenticated() && request.auth.token.role == 'cliente';
-    }
-    
-    // Función para verificar si es el propio usuario
-    function isSelf(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+    function isAuthed() { return request.auth != null; }
+
+    // Ajustes (lectura; escritura solo admin roles en M2+)
+    match /Ajustes/{doc} {
+      allow read: if isAuthed();
+      allow write: if false;
     }
 
-    // Reglas para la colección Usuarios
-    match /Usuarios/{userId} {
-      allow read: if isAuthenticated();
-      allow create: if isAdmin();
-      allow update: if isAdmin() || isSelf(userId);
-      allow delete: if isAdmin();
-      
-      // Reglas para subcolecciones de Usuarios
-      match /Historial/{historialId} {
-        allow read: if isAdmin() || isSelf(userId);
-        allow write: if isAdmin() || isMesero();
-      }
+    // Clientes (ID = DNI): lectura/escritura autenticada en M1, roles en M2+
+    match /Clientes/{dni} {
+      allow read, write: if isAuthed();
     }
-    
-    // Reglas para la colección Beneficios
-    match /Beneficios/{beneficioId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
-      
-      match /Seriales/{serialId} {
-        allow read: if isAuthenticated();
-        allow write: if isAdmin() || isMesero();
-      }
+
+    // Beneficios: lectura autenticada; escritura en Admin (M2+)
+    match /Beneficios/{id} {
+      allow read: if isAuthed();
+      allow write: if false;
     }
-    
-    // Reglas para la colección Historial (global)
-    match /Historial/{historialId} {
-      allow read: if isAdmin();
-      allow write: if isAdmin() || isMesero();
+
+    // BeneficioSeriales (docId = serial): lectura autenticada; canje por transacción en backend/app
+    match /BeneficioSeriales/{serial} {
+      allow read: if isAuthed();
+      allow write: if isAuthed(); // restringir por rol/claim en M2+
     }
-    
-    // Reglas para la colección BeneficioSeriales
-    match /BeneficioSeriales/{serialId} {
-      allow read: if isAuthenticated();
-      allow create: if isAdmin() || isMesero();
-      allow update: if isAdmin() || isMesero();
-      allow delete: if isAdmin();
+
+    // Historial: lectura/escritura autenticada
+    match /Historial/{id} {
+      allow read, write: if isAuthed();
     }
-    
-    // Reglas para la colección Configuracion
-    match /Configuracion/{configId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
-    }
-    
-    // Reglas para la colección Notificaciones
-    match /Notificaciones/{notifId} {
-      allow read: if isAuthenticated() && (
-        resource.data.recipientId == request.auth.uid || 
-        resource.data.recipientId == 'all' ||
-        isAdmin()
-      );
-      allow write: if isAdmin();
+
+    // Denegado por defecto
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
