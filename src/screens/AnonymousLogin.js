@@ -55,7 +55,6 @@ export default function AnonymousLogin({ onDone, navigation }) {
                 walletActivo: true
               });
               console.log('Perfil de cliente creado correctamente');
-              
               // Si llega aquí, el usuario se creó con éxito
               return userCredential;
             } catch (createError) {
