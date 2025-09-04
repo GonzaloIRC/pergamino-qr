@@ -12,7 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Credenciales de Firebase configuradas desde variables de entorno
 // cuando están disponibles, o usando valores de respaldo para desarrollo
 const firebaseConfig = {
-  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || 'AIzaSyCeQU3rKVlDKhWkyF5mFqDp9NYDMPAfOt4',
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || 'YOUR_API_KEY',
   authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || 'codigos-pergamino.firebaseapp.com',
   projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || 'codigos-pergamino',
   storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || 'codigos-pergamino.firebasestorage.app',
