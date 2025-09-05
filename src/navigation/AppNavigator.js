@@ -21,6 +21,7 @@ import Customers from '../screens/Customers';
 import Reports from '../screens/Reports';
 import CustomerListScreen from '../screens/CustomerListScreen';
 import CustomerDetailScreen from '../screens/CustomerDetailScreen';
+import TrackingDashboard from '../screens/TrackingDashboard';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -69,6 +70,11 @@ export default function AppNavigator() {
             <Stack.Screen name="Campaigns" component={RequireAuth(Campaigns)} />
             <Stack.Screen name="Customers" component={RequireAuth(Customers)} />
             <Stack.Screen name="Reports" component={RequireAuth(Reports)} />
+            <Stack.Screen 
+              name="TrackingDashboard" 
+              component={RequireAuth(RequireRole(['admin'], TrackingDashboard))}
+              options={{ title: "Dashboard de Tracking" }}
+            />
             <Stack.Screen 
               name="CustomerList" 
               component={RequireAuth(RequireRole(['admin', 'waiter'], CustomerListScreen))}
