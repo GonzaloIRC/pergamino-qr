@@ -1,0 +1,127 @@
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import { Divider, Badge } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
+
+/**
+ * Componente de tabla de seguimiento para administrar mesas del restaurante
+ * @param {Object} props - Propiedades del componente
+ * @param {Array} props.tables - Lista de mesas disponibles
+ * @param {Function} props.onTablePress - Función a ejecutar cuando se presiona una mesa
+ * @param {String} props.role - Rol del usuario ('admin', 'waiter')
+ */
+export default function TrackingTable({ tables = [], onTablePress, role = 'waiter' }) {
+  const navigation = useNavigation();
+
+  // Determinar el color según el estado de la mesa
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'occupied': return '#F44336'; // Rojo
+      case 'available': return '#4CAF50'; // Verde
+      case 'reserved': return '#FFC107'; // Amarillo
+      case 'cleaning': return '#2196F3'; // Azul
+      default: return '#9E9E9E'; // Gris
+    }
+  };
+
+  // Renderizar cada elemento de la lista
+  const renderTableItem = ({ item }) => {
+    const statusColor = getStatusColor(item.status);
+    
+    return (
+      <TouchableOpacity 
+        style={styles.tableItem}
+        onPress={() => onTablePress ? onTablePress(item) : navigation.navigate('TableDetail', { tableId: item.id })}
+      >
+        <View style={styles.tableHeader}>
+          <Text style={styles.tableName}>Mesa {item.number}</Text>
+          <Badge 
+            size={14}
+            style={[styles.statusBadge, { backgroundColor: statusColor }]}
+          />
+        </View>
+        
+        <Divider style={styles.divider} />
+        
+        <View style={styles.tableInfo}>
+          <Text style={styles.infoText}>Capacidad: {item.capacity}</Text>
+          <Text style={styles.infoText}>
+            Estado: {
+              item.status === 'occupied' ? 'Ocupada' :
+              item.status === 'available' ? 'Disponible' :
+              item.status === 'reserved' ? 'Reservada' :
+              item.status === 'cleaning' ? 'Limpieza' : 'Desconocido'
+            }
+          </Text>
+          {item.status === 'occupied' && (
+            <>
+              <Text style={styles.infoText}>Cliente: {item.customer?.name || 'N/A'}</Text>
+              <Text style={styles.infoText}>Tiempo: {item.occupiedTime || '00:00'}</Text>
+            </>
+          )}
+          {item.status === 'reserved' && (
+            <Text style={styles.infoText}>Reservada para: {item.reservedFor || 'N/A'}</Text>
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  return (
+    <View style={styles.container}>
+      <FlatList
+        data={tables}
+        renderItem={renderTableItem}
+        keyExtractor={item => item.id.toString()}
+        contentContainerStyle={styles.listContainer}
+        numColumns={2}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 10,
+  },
+  listContainer: {
+    padding: 5,
+  },
+  tableItem: {
+    flex: 1,
+    margin: 5,
+    padding: 15,
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    maxWidth: '47%',
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  tableName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  statusBadge: {
+    marginLeft: 5,
+  },
+  divider: {
+    marginVertical: 10,
+  },
+  tableInfo: {
+    marginTop: 5,
+  },
+  infoText: {
+    fontSize: 14,
+    marginBottom: 5,
+    color: '#616161',
+  },
+});

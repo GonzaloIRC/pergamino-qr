@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:android/app/src/main/java/com/pergamino/MainApplication.kt
+package com.pergamino
+========
 package com.pergamino.app
+>>>>>>>> origin/main:android/app/src/main/java/com/pergamino/app/MainApplication.kt
 
 import android.app.Application
 import android.content.res.Configuration

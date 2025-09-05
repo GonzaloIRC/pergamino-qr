@@ -1,14 +1,13 @@
 // src/utils/firebaseCredentialCheck.js
-import { initializeApp } from 'firebase/app';
-import { getAuth, connectAuthEmulator, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { app, auth, db } from '../services/firebaseClient';
 
 /**
  * Verifica que las credenciales de Firebase sean válidas
  * @returns {Promise<{success: boolean, message: string}>}
  */
 export async function checkFirebaseCredentials() {
-  // Credenciales actuales para verificar
+  // Verificamos las credenciales configuradas
   const currentCredentials = {
     apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || 'YOUR_API_KEY',
     authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || 'codigos-pergamino.firebaseapp.com',
@@ -25,9 +24,8 @@ export async function checkFirebaseCredentials() {
   });
 
   try {
-    // Inicializar una instancia temporal de Firebase con estas credenciales
-    const app = initializeApp(currentCredentials, 'credentialCheck');
-    const auth = getAuth(app);
+    // Utilizamos la instancia ya inicializada desde firebaseClient.js
+    // No necesitamos inicializar una nueva app
     
     // Si estamos usando emuladores, conectamos a ellos
     const useEmulators = process.env.EXPO_PUBLIC_USE_EMULATORS === 'true';
