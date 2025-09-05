@@ -1,54 +1,43 @@
-// filepath: app.config.ts
-import type { ExpoConfig } from 'expo/config';
+import 'dotenv/config';
+import { ExpoConfig } from '@expo/config';
+
+const pkg = 'com.gonzaloirc.pergaminoapp';
 
 const config: ExpoConfig = {
-  name: 'PergaminoApp',
+  name: 'Pergamino App',
   slug: 'pergamino-app',
-  version: '1.0.0',
   scheme: 'pergamino',
-  owner: undefined,
+  version: process.env.EXPO_PUBLIC_APP_VERSION || '0.1.0',
   extra: {
-    // Firebase (usamos .env.local con EXPO_PUBLIC_*)
-    EXPO_PUBLIC_USE_EMULATORS: process.env.EXPO_PUBLIC_USE_EMULATORS ?? 'false',
-    EXPO_PUBLIC_FIREBASE_PROJECT_ID: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
     EXPO_PUBLIC_FIREBASE_API_KEY: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
-    EXPO_PUBLIC_FIREBASE_APP_ID: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
-    EXPO_PUBLIC_FIREBASE_SENDER_ID: process.env.EXPO_PUBLIC_FIREBASE_SENDER_ID,
-    EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID,
     EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
-    EXPO_PUBLIC_FIREBASE_BUCKET: process.env.EXPO_PUBLIC_FIREBASE_BUCKET,
-    // Emuladores
-    EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST: process.env.EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST ?? '127.0.0.1',
-    EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_PORT: process.env.EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_PORT ?? '9099',
-    EXPO_PUBLIC_FIRESTORE_EMULATOR_HOST: process.env.EXPO_PUBLIC_FIRESTORE_EMULATOR_HOST ?? '127.0.0.1',
-    EXPO_PUBLIC_FIRESTORE_EMULATOR_PORT: process.env.EXPO_PUBLIC_FIRESTORE_EMULATOR_PORT ?? '8080',
+    EXPO_PUBLIC_FIREBASE_PROJECT_ID: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+    EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    EXPO_PUBLIC_FIREBASE_APP_ID: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+    EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID,
+    EXPO_PUBLIC_USE_EMULATORS: process.env.EXPO_PUBLIC_USE_EMULATORS || '0',
+    EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST: process.env.EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST || 'localhost',
+    EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_PORT: process.env.EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_PORT || '9099',
+    EXPO_PUBLIC_FIRESTORE_EMULATOR_HOST: process.env.EXPO_PUBLIC_FIRESTORE_EMULATOR_HOST || 'localhost',
+    EXPO_PUBLIC_FIRESTORE_EMULATOR_PORT: process.env.EXPO_PUBLIC_FIRESTORE_EMULATOR_PORT || '8080',
+    EXPO_PUBLIC_QR_TTL_SECONDS: process.env.EXPO_PUBLIC_QR_TTL_SECONDS || '30',
   },
   ios: {
-    bundleIdentifier: 'com.gonzaloirc.pergaminoapp',
+    supportsTablet: false,
+    bundleIdentifier: pkg,
   },
   android: {
-    package: 'com.gonzaloirc.pergaminoapp',
-    compileSdkVersion: 35,
-    targetSdkVersion: 35,
+    package: pkg,
     permissions: [
-      'CAMERA',
-      'INTERNET',
-      'ACCESS_COARSE_LOCATION',
-      'ACCESS_FINE_LOCATION',
-      'POST_NOTIFICATIONS',
-      'VIBRATE',
-      'WAKE_LOCK',
+      'android.permission.CAMERA',
+      'android.permission.INTERNET',
+      'android.permission.ACCESS_COARSE_LOCATION',
+      'android.permission.ACCESS_FINE_LOCATION',
+      'android.permission.POST_NOTIFICATIONS',
+      'android.permission.VIBRATE',
+      'android.permission.WAKE_LOCK',
     ],
-    intentFilters: [
-      {
-        action: 'VIEW',
-        data: [{ scheme: 'pergamino', host: '*' }],
-        category: ['BROWSABLE', 'DEFAULT'],
-      },
-    ],
-  },
-  web: {
-    bundler: 'metro',
   },
 };
 
