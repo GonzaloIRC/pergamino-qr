@@ -12,13 +12,17 @@
     "test:watch": "jest --watch",
     "start": "expo start --dev-client",
     "start:clean": "expo start --dev-client --clear",
+    "start:dev": "expo start --dev-client --clear",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
     "prepare-m1": "node scripts/prepare-m1.js",
     "prebuild": "node scripts/prebuild-sync.js",
     "doctor": "expo-doctor",
-    "scan": "node SCRIPTS/context-scan-fix.js"
+    "scan": "node SCRIPTS/context-scan-fix.js",
+    "emulators:start": "npx --yes firebase-tools@latest emulators:start --project demo-pergamino",
+    "emulators:export": "npx --yes firebase-tools@latest emulators:export ./emulator-data",
+    "emulators:import": "npx --yes firebase-tools@latest emulators:import ./emulator-data"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
