@@ -1,32 +1,28 @@
-export default ({ config }) => ({
-  ...config,
-  name: "Pergamino",
-  slug: "pergamino-app",
-  scheme: "pergamino",
-  version: "1.1.0",
-  orientation: "portrait",
-  userInterfaceStyle: "light",
-  assetBundlePatterns: [
-    "**/*"
-  ],
-  ios: {
-    supportsTablet: true,
-    bundleIdentifier: "com.pergamino.app"
-  },
+// filepath: app.config.ts
+import type { ExpoConfig } from '@expo/config-types';
+
+const config: ExpoConfig = {
+  name: 'Pergamino App',
+  slug: 'pergamino-app',
+  version: '1.0.0',
+  sdkVersion: '53.0.0',
   android: {
-    package: "com.pergamino.app"
+    package: 'com.pergamino',
+    permissions: ['CAMERA']
   },
-  web: {
-  },
-  plugins: [
-    "expo-camera"
-  ],
   extra: {
-    EXPO_PUBLIC_FIREBASE_API_KEY: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
-    EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    EXPO_PUBLIC_USE_EMULATORS: process.env.EXPO_PUBLIC_USE_EMULATORS ?? 'true',
     EXPO_PUBLIC_FIREBASE_PROJECT_ID: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
-    EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET ?? process.env.EXPO_PUBLIC_FIREBASE_BUCKET, // legacy fallback
-    EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-    EXPO_PUBLIC_FIREBASE_APP_ID: process.env.EXPO_PUBLIC_FIREBASE_APP_ID
+    EXPO_PUBLIC_FIREBASE_API_KEY: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+    EXPO_PUBLIC_FIREBASE_APP_ID: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+    EXPO_PUBLIC_FIREBASE_SENDER_ID: process.env.EXPO_PUBLIC_FIREBASE_SENDER_ID,
+    EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID,
+    EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    EXPO_PUBLIC_FIREBASE_BUCKET: process.env.EXPO_PUBLIC_FIREBASE_BUCKET,
+    EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST: process.env.EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST ?? '127.0.0.1',
+    EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_PORT: process.env.EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_PORT ?? '9099',
+    EXPO_PUBLIC_FIRESTORE_EMULATOR_HOST: process.env.EXPO_PUBLIC_FIRESTORE_EMULATOR_HOST ?? '127.0.0.1',
+    EXPO_PUBLIC_FIRESTORE_EMULATOR_PORT: process.env.EXPO_PUBLIC_FIRESTORE_EMULATOR_PORT ?? '8080'
   }
-});
+};
+export default config;

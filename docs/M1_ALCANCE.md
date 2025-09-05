@@ -2,6 +2,8 @@
 
 Este documento define el alcance mínimo para la fase 1 del proyecto Pergamino, enfocado en retomar la funcionalidad básica con seguridad mejorada.
 
+> **Nota importante:** Los componentes relacionados con TrackingTable (gestión de mesas) son solo de referencia documental y se encuentran en la carpeta `docs/reference/trackingtable`. No se implementarán como parte del alcance principal. Se han creado placeholders básicos para mantener la compatibilidad del código.
+
 ## Objetivos Principales
 
 1. **Inicialización Modular de Firebase**

@@ -29,7 +29,13 @@
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
     "no-console": ["warn", { "allow": ["warn", "error"] }],
-    "no-unused-vars": "warn"
+    "no-unused-vars": "warn",
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": ["**/docs/**", "**/docs/reference/**", "**/docs/reference/trackingtable/**"]
+      }
+    ]
   },
   "settings": {
     "react": {

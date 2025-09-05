@@ -1,4 +1,4 @@
-package com.pergamino.app
+package com.pergamino
 
 import android.os.Build
 import android.os.Bundle
