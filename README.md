@@ -83,3 +83,15 @@ npx expo start
 ## Notas
 - Las campañas pueden personalizarse desde Firebase o más adelante mediante panel web.
 - Para consultas técnicas, revisar la documentación en la carpeta `docs/`
+
+## Desarrollo (Expo Dev Client)
+
+Ejecutar emuladores Firebase: npm run emulators:start
+
+Iniciar app en dispositivo físico: npx expo start --dev-client
+
+Semillas: node scripts/seedBeneficioDemo.js
+
+Variables: usar .env.local con EXPO_PUBLIC_*
+
+Escáner: expo-camera (prohibido expo-barcode-scanner)
