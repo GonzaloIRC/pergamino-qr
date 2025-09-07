@@ -28,12 +28,16 @@ export const useEmulators = (process.env.EXPO_PUBLIC_USE_EMULATORS ?? 'false') =
 
 export function enableEmulatorsIfNeeded({ auth, db }) {
 	if (!useEmulators) return;
-	const ah = process.env.EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST || '127.0.0.1';
-	const ap = parseInt(process.env.EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_PORT || '9100', 10);
-	const fh = process.env.EXPO_PUBLIC_FIRESTORE_EMULATOR_HOST || '127.0.0.1';
-	const fp = parseInt(process.env.EXPO_PUBLIC_FIRESTORE_EMULATOR_PORT || '8081', 10);
-	try { connectAuthEmulator(auth, `http://${ah}:${ap}`, { disableWarnings: true }); } catch {}
-	try { connectFirestoreEmulator(db, fh, fp); } catch {}
+	const ah = process.env.EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST || 'localhost';
+	const ap = parseInt(process.env.EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_PORT || '9099', 10);
+	const fh = process.env.EXPO_PUBLIC_FIRESTORE_EMULATOR_HOST || 'localhost';
+	const fp = parseInt(process.env.EXPO_PUBLIC_FIRESTORE_EMULATOR_PORT || '8080', 10);
+	try { connectAuthEmulator(auth, `http://${ah}:${ap}`, { disableWarnings: true }); } catch (e) { console.warn("Error conectando Auth Emulator:", e); }
+	try { connectFirestoreEmulator(db, fh, fp); } catch (e) { console.warn("Error conectando Firestore Emulator:", e); }
 }
 
-// ...existing code...
+// Inicializar los emuladores al inicio si es necesario
+if (useEmulators) {
+	console.log('🔧 Conectando a emuladores de Firebase...');
+	enableEmulatorsIfNeeded({ auth, db });
+}

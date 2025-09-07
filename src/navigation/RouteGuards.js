@@ -1,36 +1,43 @@
-import React, { useContext } from 'react';
-import { View, Text, Button } from 'react-native';
-import { AuthContext } from '../context/AuthContext';
+// src/navigation/RouteGuards.js
+import React from 'react';
+import { View, Text, ActivityIndicator } from 'react-native';
+import { useAuth } from '../context/AuthContext';
 
-export function RequireAuth(Component) {
-	return function Wrapper(props) {
-		const { isAuthenticated, loading } = useContext(AuthContext);
-		if (loading) return <Text>Cargando...</Text>;
-		if (!isAuthenticated) {
-			return (
-				<View style={{ padding: 24 }}>
-					<Text style={{ marginBottom: 12 }}>Acceso denegado: inicia sesión.</Text>
-					<Button title="Ir a Login" onPress={() => props.navigation.replace('Login')} />
-				</View>
-			);
-		}
-		return <Component {...props} />;
-	};
+// Component that only shows its children if the user is authenticated
+export function RequireAuth({ children }) {
+  const { user } = useAuth();
+  
+  if (!user) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+        <Text style={{ marginBottom: 20, fontSize: 18 }}>
+          Por favor inicia sesión para continuar
+        </Text>
+      </View>
+    );
+  }
+  
+  return children;
 }
 
-export function RequireRole(roles, Component) {
-	return function Wrapper(props) {
-		const { userRole, isAuthenticated, loading, logout } = useContext(AuthContext);
-		if (loading) return <Text>Cargando...</Text>;
-		if (!isAuthenticated) return <RequireAuth Component={Component} {...props} />;
-		if (!roles.includes(userRole || 'cliente')) {
-			return (
-				<View style={{ padding: 24 }}>
-					<Text style={{ marginBottom: 12 }}>Acceso denegado: rol insuficiente.</Text>
-					<Button title="Cerrar sesión" onPress={logout} />
-				</View>
-			);
-		}
-		return <Component {...props} />;
-	};
+// Component that only shows its children if the user has the specified role
+export function RequireRole({ children, role }) {
+  const { role: userRole } = useAuth();
+  
+  // Role can be a string or an array of allowed roles
+  const hasPermission = Array.isArray(role)
+    ? role.includes(userRole)
+    : (role === userRole);
+    
+  if (!hasPermission) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+        <Text style={{ marginBottom: 20, fontSize: 18 }}>
+          No tienes permisos para acceder a esta sección
+        </Text>
+			</View>
+		);
+	}
+	
+	return children;
 }
