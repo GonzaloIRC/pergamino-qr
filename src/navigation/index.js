@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import AuthNavigator from './AuthNavigator';
@@ -13,3 +13,5 @@ export default function RootNavigation() {
     </NavigationContainer>
   );
 }
+
+

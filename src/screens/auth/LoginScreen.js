@@ -22,18 +22,22 @@ export default function LoginScreen({ navigation }) {
       <Text style={styles.subtitle}>Login</Text>
       
       <View style={styles.form}>
+        <Text style={styles.inputLabel}>Correo Electrónico</Text>
         <TextInput
           style={styles.input}
-          placeholder="Email"
+          placeholder="ejemplo@correo.com"
+          placeholderTextColor="#999"
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
           keyboardType="email-address"
         />
         
+        <Text style={styles.inputLabel}>Contraseña</Text>
         <TextInput
           style={styles.input}
-          placeholder="Password"
+          placeholder="Ingresa tu contraseña"
+          placeholderTextColor="#999"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -80,6 +84,13 @@ const styles = StyleSheet.create({
   form: {
     width: '100%',
   },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 5,
+    marginLeft: 3,
+  },
   input: {
     height: 50,
     borderWidth: 1,
@@ -88,6 +99,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     paddingHorizontal: 15,
     fontSize: 16,
+    backgroundColor: '#f9f9f9',
   },
   button: {
     backgroundColor: '#6200ee',

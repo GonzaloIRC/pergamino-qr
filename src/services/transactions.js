@@ -1,5 +1,8 @@
 // src/services/transactions.js
-import { collection, addDoc, doc, getDoc, updateDoc, serverTimestamp, query, where, orderBy, getDocs } from 'firebase/firestore';
+import { 
+  collection, addDoc, doc, getDoc, updateDoc, serverTimestamp, 
+  query, where, getDocs, runTransaction, Timestamp
+} from 'firebase/firestore';
 import { db } from './firebaseClient';
 
 /**
@@ -10,83 +13,87 @@ import { db } from './firebaseClient';
  */
 export async function processBenefitRedemption(serialId, userId) {
   try {
-    // 1. Verificar que el serial existe y está activo
-    const serialRef = doc(db, 'seriales', serialId);
-    const serialSnap = await getDoc(serialRef);
-
-    if (!serialSnap.exists()) {
+    // Usar una transacción de Firestore para garantizar atomicidad
+    const result = await runTransaction(db, async (transaction) => {
+      // 1. Obtener el documento del serial
+      const serialRef = doc(db, 'BeneficioSeriales', serialId);
+      const serialDoc = await transaction.get(serialRef);
+      
+      if (!serialDoc.exists()) {
+        return {
+          success: false,
+          message: `El serial ${serialId} no existe.`
+        };
+      }
+      
+      const serialData = serialDoc.data();
+      
+      // 2. Verificar que el serial esté activo
+      if (serialData.estado !== 'activo') {
+        return {
+          success: false, 
+          message: `El serial ${serialId} ya ha sido utilizado o está cancelado.`,
+          estado: serialData.estado
+        };
+      }
+      
+      // 3. Obtener información del beneficio
+      const beneficioRef = doc(db, 'Beneficios', serialData.beneficioId);
+      const beneficioDoc = await transaction.get(beneficioRef);
+      
+      if (!beneficioDoc.exists()) {
+        return {
+          success: false,
+          message: 'El beneficio asociado no existe.'
+        };
+      }
+      
+      const beneficioData = beneficioDoc.data();
+      
+      // 4. Verificar vigencia del beneficio
+      const now = new Date();
+      const validoDesde = beneficioData.validoDesde?.toDate() || now;
+      const validoHasta = beneficioData.validoHasta?.toDate() || now;
+      
+      if (now < validoDesde || now > validoHasta) {
+        return {
+          success: false,
+          message: 'El beneficio no está vigente en la fecha actual.'
+        };
+      }
+      
+      // 5. Actualizar el estado del serial en la misma transacción
+      transaction.update(serialRef, {
+        estado: 'usado',
+        usadoPor: userId,
+        usadoEn: serverTimestamp()
+      });
+      
+      // 6. Registrar el historial en la misma transacción
+      const historialRef = doc(collection(db, 'Historial'));
+      transaction.set(historialRef, {
+        tipo: 'canje',
+        serialId,
+        beneficioId: serialData.beneficioId,
+        beneficioNombre: beneficioData.nombre,
+        userId,
+        ts: serverTimestamp(),
+        estado: 'completado'
+      });
+      
+      // 7. Devolver resultado exitoso con los datos
       return {
-        success: false,
-        message: `El serial ${serialId} no existe.`
+        success: true,
+        message: `Serial ${serialId} canjeado exitosamente`,
+        beneficio: beneficioData,
+        serialData: serialData,
+        transactionId: historialRef.id
       };
-    }
-
-    const serialData = serialSnap.data();
-    if (serialData.estado !== 'activo') {
-      return {
-        success: false,
-        message: `El serial ${serialId} ya ha sido utilizado o está cancelado.`
-      };
-    }
-
-    // 2. Obtener datos del beneficio
-    const beneficioRef = doc(db, 'beneficios', serialData.beneficioId);
-    const beneficioSnap = await getDoc(beneficioRef);
-    
-    if (!beneficioSnap.exists()) {
-      return {
-        success: false,
-        message: 'El beneficio asociado no existe.'
-      };
-    }
-
-    const beneficioData = beneficioSnap.data();
-    
-    // 3. Verificar validez de fechas
-    const now = new Date();
-    const validoDesde = beneficioData.validoDesde?.toDate() || now;
-    const validoHasta = beneficioData.validoHasta?.toDate() || now;
-    
-    if (now < validoDesde || now > validoHasta) {
-      return {
-        success: false,
-        message: 'El beneficio no está vigente en la fecha actual.'
-      };
-    }
-
-    // 4. Marcar el serial como usado
-    await updateDoc(serialRef, {
-      estado: 'usado',
-      usadoPor: userId,
-      usadoEn: serverTimestamp()
     });
-
-    // 5. Registrar la transacción
-    const transactionData = {
-      tipo: 'canje',
-      serialId,
-      beneficioId: serialData.beneficioId,
-      userId,
-      timestamp: serverTimestamp(),
-      detalles: {
-        nombreBeneficio: beneficioData.nombre,
-        descripcion: beneficioData.descripcion
-      }
-    };
-
-    const transactionRef = await addDoc(collection(db, 'transactions'), transactionData);
-
-    return {
-      success: true,
-      message: `Beneficio "${beneficioData.nombre}" canjeado exitosamente.`,
-      transactionId: transactionRef.id,
-      beneficio: {
-        ...beneficioData,
-        id: beneficioData.id
-      }
-    };
+    
+    return result;
   } catch (error) {
-    console.error('Error en processBenefitRedemption:', error);
+    console.error("Error en la transacción:", error);
     return {
       success: false,
       message: `Error al procesar el canje: ${error.message}`,
@@ -104,122 +111,105 @@ export async function processBenefitRedemption(serialId, userId) {
  */
 export async function processPointAccumulation(dni, nonce, staffId) {
   try {
-    // 1. Buscar cliente por DNI
-    const clientesRef = collection(db, 'clientes');
-    const q = query(clientesRef, where('dni', '==', dni));
-    const querySnapshot = await getDocs(q);
-    
-    let clienteId;
-    let clienteData;
-    
-    // Si no existe el cliente, lo creamos
-    if (querySnapshot.empty) {
-      const nuevoCliente = {
-        dni,
-        createdAt: serverTimestamp(),
-        puntos: 0,
-        visits: 0,
-        lastVisit: serverTimestamp()
-      };
-      
-      const nuevoClienteRef = await addDoc(clientesRef, nuevoCliente);
-      clienteId = nuevoClienteRef.id;
-      clienteData = nuevoCliente;
-    } else {
-      const clienteDoc = querySnapshot.docs[0];
-      clienteId = clienteDoc.id;
-      clienteData = clienteDoc.data();
-    }
-    
-    // 2. Verificar que no sea un nonce duplicado
-    const transactionsRef = collection(db, 'transactions');
-    const nonceQuery = query(
-      transactionsRef, 
-      where('tipo', '==', 'acumulacion'),
-      where('detalles.nonce', '==', nonce)
+    // Verificar si el nonce ya fue usado (previene duplicados)
+    const nonceQuery = query(collection(db, 'Historial'), 
+      where('nonce', '==', nonce),
+      where('tipo', '==', 'acumulacion')
     );
     
     const nonceSnapshot = await getDocs(nonceQuery);
     if (!nonceSnapshot.empty) {
       return {
         success: false,
-        message: 'Esta transacción ya fue procesada anteriormente.'
+        message: 'Esta operación ya fue procesada anteriormente.'
       };
     }
+
+    // Buscar al cliente por DNI
+    const clientesQuery = query(collection(db, 'Clientes'), where('dni', '==', dni));
+    const clientesSnapshot = await getDocs(clientesQuery);
     
-    // 3. Calcular puntos a otorgar (en un sistema real esto vendría de un cálculo basado en el consumo)
-    const puntosOtorgados = 10; // Valor fijo para este ejemplo
-    
-    // 4. Actualizar puntos del cliente
-    const clienteRef = doc(db, 'clientes', clienteId);
-    await updateDoc(clienteRef, {
-      puntos: (clienteData.puntos || 0) + puntosOtorgados,
-      visits: (clienteData.visits || 0) + 1,
-      lastVisit: serverTimestamp()
+    if (clientesSnapshot.empty) {
+      return {
+        success: false,
+        message: `No existe un cliente con DNI ${dni}.`
+      };
+    }
+
+    // Usar transacción para actualizar puntos y crear historial
+    return await runTransaction(db, async (transaction) => {
+      // Obtener documento del cliente
+      const clienteDoc = clientesSnapshot.docs[0];
+      const clienteData = clienteDoc.data();
+      const clienteRef = clienteDoc.ref;
+      
+      // Configuración de puntos (podría venir de settings)
+      const puntosAcumular = 10; 
+      
+      // Actualizar puntos del cliente
+      const puntosActuales = clienteData.puntos || 0;
+      const nuevosPuntos = puntosActuales + puntosAcumular;
+      
+      transaction.update(clienteRef, {
+        puntos: nuevosPuntos,
+        ultimaActualizacion: serverTimestamp()
+      });
+      
+      // Registrar en historial
+      const historialRef = doc(collection(db, 'Historial'));
+      transaction.set(historialRef, {
+        tipo: 'acumulacion',
+        dni: dni,
+        nonce: nonce,
+        puntos: puntosAcumular,
+        staffId: staffId,
+        clienteId: clienteDoc.id,
+        clienteNombre: clienteData.nombre || 'Cliente',
+        ts: serverTimestamp(),
+        puntosResultantes: nuevosPuntos
+      });
+      
+      return {
+        success: true,
+        message: `Se han acumulado ${puntosAcumular} puntos para el cliente ${clienteData.nombre || dni}.`,
+        puntos: puntosAcumular,
+        puntosActuales: nuevosPuntos,
+        clienteId: clienteDoc.id,
+        historialId: historialRef.id
+      };
     });
-    
-    // 5. Registrar la transacción
-    const transactionData = {
-      tipo: 'acumulacion',
-      clienteId,
-      staffId,
-      timestamp: serverTimestamp(),
-      detalles: {
-        dni,
-        nonce,
-        puntosOtorgados
-      }
-    };
-    
-    const transactionRef = await addDoc(collection(db, 'transactions'), transactionData);
-    
-    return {
-      success: true,
-      message: `${puntosOtorgados} puntos acumulados para el cliente con DNI ${dni}.`,
-      transactionId: transactionRef.id,
-      clienteId,
-      puntosOtorgados,
-      totalPuntos: (clienteData.puntos || 0) + puntosOtorgados
-    };
   } catch (error) {
-    console.error('Error en processPointAccumulation:', error);
+    console.error("Error en acumulación de puntos:", error);
     return {
       success: false,
-      message: `Error al procesar la acumulación de puntos: ${error.message}`,
+      message: `Error al acumular puntos: ${error.message}`,
       error
     };
   }
 }
 
 /**
- * Obtiene el historial de transacciones para un usuario
- * @param {string} userId - ID del usuario
- * @param {number} limit - Límite de transacciones a obtener
- * @returns {Promise<Array>} - Historial de transacciones
+ * Genera un código de nonce aleatorio para QR
+ * @returns {string} Un string alfanumérico único de 10 caracteres
  */
-export async function getUserTransactionHistory(userId, limit = 10) {
-  try {
-    const transactionsRef = collection(db, 'transactions');
-    const q = query(
-      transactionsRef,
-      where('userId', '==', userId),
-      orderBy('timestamp', 'desc'),
-      limit(limit)
-    );
-    
-    const querySnapshot = await getDocs(q);
-    const transactions = [];
-    
-    querySnapshot.forEach(doc => {
-      transactions.push({
-        id: doc.id,
-        ...doc.data()
-      });
-    });
-    
-    return transactions;
-  } catch (error) {
-    console.error('Error obteniendo historial de transacciones:', error);
-    throw error;
+export function generateNonce() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  const length = 10;
+  
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
+  
+  return result;
+}
+
+/**
+ * Genera un formato de QR para acumulación de puntos
+ * @param {string} dni - DNI del cliente 
+ * @returns {string} - El formato QR para acumular puntos
+ */
+export function generatePointsQR(dni) {
+  const nonce = generateNonce();
+  return `APP:${dni}:${nonce}`;
 }

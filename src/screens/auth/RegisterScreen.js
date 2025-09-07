@@ -28,26 +28,32 @@ export default function RegisterScreen({ navigation }) {
       <Text style={styles.subtitle}>Create Account</Text>
       
       <View style={styles.form}>
+        <Text style={styles.inputLabel}>Correo Electrónico</Text>
         <TextInput
           style={styles.input}
-          placeholder="Email"
+          placeholder="ejemplo@correo.com"
+          placeholderTextColor="#999"
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
           keyboardType="email-address"
         />
         
+        <Text style={styles.inputLabel}>Contraseña</Text>
         <TextInput
           style={styles.input}
-          placeholder="Password"
+          placeholder="Mínimo 6 caracteres"
+          placeholderTextColor="#999"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
         />
         
+        <Text style={styles.inputLabel}>Confirmar Contraseña</Text>
         <TextInput
           style={styles.input}
-          placeholder="Confirm Password"
+          placeholder="Repite tu contraseña"
+          placeholderTextColor="#999"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
@@ -91,6 +97,13 @@ const styles = StyleSheet.create({
   form: {
     width: '100%',
   },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 5,
+    marginLeft: 3,
+  },
   input: {
     height: 50,
     borderWidth: 1,
@@ -98,6 +111,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 15,
     paddingHorizontal: 15,
+    fontSize: 16,
+    backgroundColor: '#f9f9f9',
     fontSize: 16,
   },
   button: {

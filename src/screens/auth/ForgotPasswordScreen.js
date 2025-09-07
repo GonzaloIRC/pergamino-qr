@@ -40,9 +40,11 @@ export default function ForgotPasswordScreen({ navigation }) {
             Enter your email address below and we'll send you instructions to reset your password.
           </Text>
           
+          <Text style={styles.inputLabel}>Correo Electrónico</Text>
           <TextInput
             style={styles.input}
-            placeholder="Email"
+            placeholder="ejemplo@correo.com"
+            placeholderTextColor="#999"
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -93,11 +95,19 @@ const styles = StyleSheet.create({
   form: {
     width: '100%',
   },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 5,
+    marginLeft: 3,
+  },
   input: {
     height: 50,
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
+    backgroundColor: '#f9f9f9',
     marginBottom: 15,
     paddingHorizontal: 15,
     fontSize: 16,

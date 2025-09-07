@@ -1,155 +1,139 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-import { Camera } from 'expo-camera';
-import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import { processBenefitRedemption, processPointAccumulation } from '../../services/transactions';
+import Scanner from '../../components/BarcodeScanner/Scanner';
+import { parseQrPayload } from '../../utils/qr';
 
 export default function ScannerScreen({ navigation }) {
-  const { currentUser } = useAuth();
-  const [hasPermission, setHasPermission] = useState(null);
-  const [scanned, setScanned] = useState(false);
-  const [processing, setProcessing] = useState(false);
-  const [flashMode, setFlashMode] = useState(Camera.Constants.FlashMode.off);
-  const scanCooldown = useRef(false);
-
-  useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
-  }, []);
-
-  const handleBarCodeScanned = async ({ type, data }) => {
-    // Debounce mechanism to prevent multiple scans
-    if (scanCooldown.current || processing) return;
-    
-    scanCooldown.current = true;
-    setScanned(true);
-    setProcessing(true);
+  const { user } = useAuth();
+  const [scanning, setScanning] = useState(true);
+  
+  const handleScan = async (scanResult) => {
+    if (!scanResult?.data) return;
+    setScanning(false);
     
     try {
-      // Parse QR code data
-      if (data.startsWith('BNF:')) {
-        // Benefit redemption flow
-        const serialId = data.substring(4); // Remove 'BNF:' prefix
-        await handleBenefitRedemption(serialId);
-      } else if (data.startsWith('APP:')) {
-        // Point accumulation flow
-        const parts = data.substring(4).split(':'); // Remove 'APP:' prefix
-        if (parts.length === 2) {
-          const [dni, nonce] = parts;
-          await handlePointAccumulation(dni, nonce);
-        } else {
-          Alert.alert('Formato Inválido', 'QR de acumulación con formato incorrecto.');
-        }
-      } else {
-        Alert.alert('QR Desconocido', 'Este código QR no es compatible con la aplicación.');
+      // Parse the QR code data
+      const parsedQr = parseQrPayload(scanResult.data);
+      
+      // Handle different QR types
+      switch(parsedQr.type) {
+        case 'benefit':
+          await handleBenefitRedemption(parsedQr.serialId);
+          break;
+        case 'customer':
+          await handlePointAccumulation(parsedQr.dni, parsedQr.nonce);
+          break;
+        default:
+          Alert.alert(
+            'Código desconocido', 
+            'El formato del código QR no es compatible con esta aplicación.',
+            [{ text: 'OK', onPress: () => setScanning(true) }]
+          );
       }
     } catch (error) {
-      console.error('Error procesando QR:', error);
-      Alert.alert('Error', 'Ocurrió un error al procesar el código QR.');
-    } finally {
-      setProcessing(false);
-      // Reset cooldown after 1.5 seconds
-      setTimeout(() => {
-        scanCooldown.current = false;
-        setScanned(false);
-      }, 1500);
+      handleScanError(error);
     }
   };
 
+  const handleScanError = (error) => {
+    console.error('Error procesando QR:', error);
+    Alert.alert(
+      'Error', 
+      'Ocurrió un error al procesar el código QR.',
+      [{ text: 'OK', onPress: () => setScanning(true) }]
+    );
+  };
+
   const handleBenefitRedemption = async (serialId) => {
-    if (!currentUser) {
-      Alert.alert('Error', 'Debes iniciar sesión para canjear beneficios.');
+    if (!user) {
+      Alert.alert(
+        'Error', 
+        'Debes iniciar sesión para canjear beneficios.',
+        [{ text: 'OK', onPress: () => setScanning(true) }]
+      );
       return;
     }
 
-    const result = await processBenefitRedemption(serialId, currentUser.uid);
+    const result = await processBenefitRedemption(serialId, user.uid);
     
     if (result.success) {
-      Alert.alert('¡Éxito!', result.message, [
+      Alert.alert('¡Beneficio canjeado!', result.message || `El serial ${serialId} ha sido canjeado exitosamente.`, [
         { text: 'OK', onPress: () => navigation.navigate('Home') }
       ]);
     } else {
-      Alert.alert('Error', result.message);
+      Alert.alert('Error en el canje', result.message || 'No se pudo procesar el canje del beneficio.', [
+        { text: 'Intentar de nuevo', onPress: () => setScanning(true) }
+      ]);
     }
   };
 
   const handlePointAccumulation = async (dni, nonce) => {
-    if (!currentUser) {
-      Alert.alert('Error', 'Debes iniciar sesión para registrar puntos.');
+    if (!user) {
+      Alert.alert('Error', 'Debes iniciar sesión para registrar puntos.', [
+        { text: 'OK', onPress: () => setScanning(true) }
+      ]);
       return;
     }
 
-    const result = await processPointAccumulation(dni, nonce, currentUser.uid);
+    const result = await processPointAccumulation(dni, nonce, user.uid);
     
     if (result.success) {
-      Alert.alert('¡Éxito!', result.message, [
-        { text: 'Ver Cliente', onPress: () => navigation.navigate('Customers', { searchDni: dni }) },
-        { text: 'OK', style: 'cancel' }
+      Alert.alert('Puntos acumulados', result.message || `Se han registrado puntos para el cliente con DNI: ${dni}.`, [
+        { text: 'OK', onPress: () => navigation.navigate('Home') }
       ]);
     } else {
-      Alert.alert('Error', result.message);
+      Alert.alert('Error en la acumulación', result.message || 'No se pudieron registrar los puntos.', [
+        { text: 'Intentar de nuevo', onPress: () => setScanning(true) }
+      ]);
     }
   };
 
-  const toggleFlashMode = () => {
-    setFlashMode(
-      flashMode === Camera.Constants.FlashMode.torch
-        ? Camera.Constants.FlashMode.off
-        : Camera.Constants.FlashMode.torch
-    );
+  const closeScanner = () => {
+    navigation.goBack();
   };
-
-  if (hasPermission === null) {
-    return <View style={styles.container}><Text>Requesting camera permission...</Text></View>;
-  }
-  if (hasPermission === false) {
-    return <View style={styles.container}><Text>No access to camera</Text></View>;
-  }
 
   return (
     <View style={styles.container}>
-      <Camera
-        style={styles.camera}
-        type={Camera.Constants.Type.back}
-        flashMode={flashMode}
-        onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-      >
-        <View style={styles.overlay}>
-          <View style={styles.scanArea}>
-            {processing && (
-              <View style={styles.processingContainer}>
-                <ActivityIndicator size="large" color="#ffffff" />
-                <Text style={styles.processingText}>Procesando...</Text>
-              </View>
-            )}
-          </View>
+      {scanning ? (
+        <Scanner onScan={handleScan} onClose={closeScanner} />
+      ) : (
+        <View style={styles.resultContainer}>
+          <Text style={styles.title}>Procesando código</Text>
+          <Text style={styles.subtitle}>Por favor espera...</Text>
           
-          <View style={styles.instructions}>
-            <Text style={styles.instructionText}>Escanea un código QR:</Text>
-            <Text style={styles.instructionDetail}>• BNF:SER-XXXX para canjear beneficio</Text>
-            <Text style={styles.instructionDetail}>• APP:DNI:CODIGO para registrar cliente</Text>
-          </View>
-        </View>
-        
-        <View style={styles.controls}>
-          <TouchableOpacity style={styles.controlButton} onPress={toggleFlashMode}>
-            <Ionicons 
-              name={flashMode === Camera.Constants.FlashMode.torch ? "flash" : "flash-off"} 
-              size={24} 
-              color="white" 
-            />
+          <TouchableOpacity style={styles.button} onPress={() => setScanning(true)}>
+            <Text style={styles.buttonText}>Escanear otro código</Text>
           </TouchableOpacity>
           
-          {scanned && (
-            <TouchableOpacity style={styles.scanAgainButton} onPress={() => setScanned(false)}>
-              <Text style={styles.scanAgainText}>Scan Again</Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity style={[styles.button, styles.secondaryButton]} onPress={closeScanner}>
+            <Text style={styles.secondaryButtonText}>Volver</Text>
+          </TouchableOpacity>
         </View>
-      </Camera>
+      )}
+    </View>
+  );}
+  }
+    
+  return (
+    <View style={styles.container}>
+      {/* Use the new Scanner component */}
+      <Scanner onScan={handleScan} onError={handleScanError} />
+      
+      {/* Instructions overlay */}
+      <View style={styles.instructions}>
+        <Text style={styles.instructionText}>Escanea un código QR:</Text>
+        <Text style={styles.instructionDetail}>• BNF:SER-XXXX para canjear beneficio</Text>
+        <Text style={styles.instructionDetail}>• APP:DNI:CODIGO para registrar cliente</Text>
+        
+        {lastScannedCode && (
+          <View style={styles.lastScannedContainer}>
+            <Text style={styles.lastScannedTitle}>Último código escaneado:</Text>
+            <Text style={styles.lastScannedText}>{lastScannedCode}</Text>
+          </View>
+        )}
+      </View>
     </View>
   );
 }
@@ -157,36 +141,50 @@ export default function ScannerScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#fff',
   },
-  camera: {
+  resultContainer: {
     flex: 1,
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scanArea: {
-    width: 250,
-    height: 250,
-    borderWidth: 2,
-    borderColor: '#fff',
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  processingContainer: {
-    backgroundColor: 'rgba(0,0,0,0.7)',
     padding: 20,
-    borderRadius: 10,
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  processingText: {
-    color: '#fff',
-    marginTop: 10,
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  subtitle: {
     fontSize: 16,
+    color: '#666',
+    marginBottom: 30,
+  },
+  button: {
+    width: '100%',
+    backgroundColor: '#6200ee',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  secondaryButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#6200ee',
+  },
+  secondaryButtonText: {
+    color: '#6200ee',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
   },
   instructions: {
     position: 'absolute',
@@ -195,42 +193,36 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.7)',
     padding: 15,
     alignItems: 'center',
+    zIndex: 10,
   },
   instructionText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  instructionDetail: {
-    color: '#ddd',
-    fontSize: 14,
     marginBottom: 5,
   },
-  controls: {
-    position: 'absolute',
-    bottom: 30,
+  instructionDetail: {
+    color: '#fff',
+    fontSize: 14,
+    marginBottom: 2,
+  },
+  lastScannedContainer: {
+    marginTop: 15,
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    padding: 10,
+    borderRadius: 5,
     width: '100%',
     alignItems: 'center',
   },
-  controlButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  scanAgainButton: {
-    backgroundColor: '#6200ee',
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 25,
-  },
-  scanAgainText: {
+  lastScannedTitle: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
+    marginBottom: 5,
   },
+  lastScannedText: {
+    color: '#0f0',
+    fontSize: 12,
+    fontFamily: 'monospace',
+  }
 });
