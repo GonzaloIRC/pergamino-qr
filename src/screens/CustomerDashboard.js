@@ -169,6 +169,26 @@ export default function CustomerDashboard() {
         )}
       </View>
       
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Programa de Referidos</Text>
+        <Card style={styles.referralsCard}>
+          <Card.Content>
+            <Text style={styles.referralText}>
+              Invita a tus amigos y gana puntos por cada nuevo cliente que se registre con tu código
+            </Text>
+          </Card.Content>
+          <Card.Actions>
+            <Button 
+              mode="contained" 
+              style={styles.referralButton}
+              onPress={() => navigation.navigate('Referrals')}
+            >
+              Ver mis referidos
+            </Button>
+          </Card.Actions>
+        </Card>
+      </View>
+      
       <Button 
         mode="contained" 
         onPress={fetchCustomerData}
@@ -310,5 +330,17 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginBottom: 30,
     borderRadius: 20,
+  },
+  referralsCard: {
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+  referralText: {
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  referralButton: {
+    borderRadius: 20,
+    marginTop: 10,
   }
 });
