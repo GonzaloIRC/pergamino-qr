@@ -1,34 +1,77 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // FUNCIONES HELPER
     function isAuthed() { return request.auth != null; }
+    function hasRole(role) { 
+      return get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.role == role;
+    }
+    function isAdmin() { return hasRole('admin'); }
+    function isWaiter() { return hasRole('waiter'); }
+    function isWaiterOrAdmin() { 
+      let role = get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.role;
+      return role == 'waiter' || role == 'admin';
+    }
+    
+    // NOTA: En desarrollo/emulador, usar esta regla más permisiva (descomentar para desarrollo)
+    // match /{document=**} {
+    //   allow read, write: if request.auth != null;
+    // }
 
-    // Ajustes (lectura; escritura solo admin roles en M2+)
+    // COLECCIONES
+    // Perfiles: cada usuario puede leer/modificar su propio perfil
+    match /Perfiles/{userId} {
+      allow read: if isAuthed() && (request.auth.uid == userId || isAdmin());
+      allow write: if isAuthed() && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Roles: solo admin puede escribir, usuarios pueden leer su propio rol
+    match /roles/{userId} {
+      allow read: if isAuthed() && (request.auth.uid == userId || isAdmin());
+      allow write: if isAuthed() && isAdmin();
+    }
+    
+    // Ajustes (lectura para todos autenticados; escritura solo admin)
     match /Ajustes/{doc} {
       allow read: if isAuthed();
-      allow write: if false;
+      allow write: if isAuthed() && isAdmin();
     }
 
-    // Clientes (ID = DNI): lectura/escritura autenticada en M1, roles en M2+
+    // Clientes (ID = DNI): lectura/escritura para waiter/admin
     match /Clientes/{dni} {
-      allow read, write: if isAuthed();
+      allow read: if isAuthed();
+      allow write: if isAuthed() && isWaiterOrAdmin();
     }
 
-    // Beneficios: lectura autenticada; escritura en Admin (M2+)
+    // Beneficios: lectura autenticada; escritura solo admin
     match /Beneficios/{id} {
       allow read: if isAuthed();
-      allow write: if false;
+      allow write: if isAuthed() && isAdmin();
     }
 
-    // BeneficioSeriales (docId = serial): lectura autenticada; canje por transacción en backend/app
+    // BeneficioSeriales: lectura por cualquiera autenticado, escritura por waiter/admin
     match /BeneficioSeriales/{serial} {
       allow read: if isAuthed();
-      allow write: if isAuthed(); // restringir por rol/claim en M2+
+      allow update: if isAuthed() && isWaiterOrAdmin();
+      allow create, delete: if isAuthed() && isAdmin();
     }
 
-    // Historial: lectura/escritura autenticada
+    // Historial: lectura general, escritura por cualquiera (para guardar transacciones)
     match /Historial/{id} {
-      allow read, write: if isAuthed();
+      allow read: if isAuthed();
+      allow create: if isAuthed();
+      allow update, delete: if isAuthed() && isAdmin();
+    }
+    
+    // Sucursales: lectura para todos autenticados, escritura solo admin
+    match /Sucursales/{id} {
+      allow read: if isAuthed();
+      allow write: if isAuthed() && isAdmin();
+    }
+    
+    // Alertas: solo admin (registro de posibles fraudes)
+    match /Alertas/{id} {
+      allow read, write: if isAuthed() && isAdmin();
     }
 
     // Denegado por defecto

@@ -1,0 +1,56 @@
+// src/services/transactions.js
+import { 
+  collection, addDoc, doc, getDoc, updateDoc, serverTimestamp, 
+  query, where, getDocs, runTransaction, Timestamp
+} from 'firebase/firestore';
+import { db } from './firebaseClient';
+import { processSerialTransaction, processPointsTransaction } from './transactionHelpers';
+
+/**
+ * Registra una transacción de canje de beneficio con un serial
+ * @param {string} serialId - ID del serial a canjear (ej: SER-0001)
+ * @param {string} userId - ID del usuario que realiza el canje
+ * @returns {Promise<Object>} - Resultado de la transacción
+ */
+export async function processBenefitRedemption(serialId, userId) {
+  // Esta implementación usa nuestra función helper que maneja transacciones atómicas
+  return processSerialTransaction(serialId, userId);
+}
+
+/**
+ * Registra puntos para un cliente identificado por DNI
+ * @param {string} dni - DNI del cliente 
+ * @param {string} nonce - Código único de la transacción
+ * @param {string} staffId - ID del usuario staff que registra los puntos
+ * @returns {Promise<Object>} - Resultado de la transacción
+ */
+export async function processPointAccumulation(dni, nonce, staffId) {
+  // Esta implementación usa nuestra función helper que maneja transacciones atómicas
+  return processPointsTransaction(dni, nonce, staffId);
+}
+
+/**
+ * Genera un código de nonce aleatorio para QR
+ * @returns {string} Un string alfanumérico único de 10 caracteres
+ */
+export function generateNonce() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  const length = 10;
+  
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  
+  return result;
+}
+
+/**
+ * Genera un formato de QR para acumulación de puntos
+ * @param {string} dni - DNI del cliente 
+ * @returns {string} - El formato QR para acumular puntos
+ */
+export function generatePointsQR(dni) {
+  const nonce = generateNonce();
+  return `APP:${dni}:${nonce}`;
+}

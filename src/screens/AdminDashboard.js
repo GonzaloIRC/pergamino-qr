@@ -67,6 +67,12 @@ export default function AdminDashboard() {
       navigateTo: 'Campaigns',
     },
     {
+      title: 'Alertas de Fraude',
+      description: 'Monitor de actividades sospechosas',
+      icon: 'shield-alert',
+      navigateTo: 'FraudAlerts',
+    },
+    {
       title: 'Reportes',
       description: 'Estadísticas y reportes de consumo',
       icon: 'chart-bar',
