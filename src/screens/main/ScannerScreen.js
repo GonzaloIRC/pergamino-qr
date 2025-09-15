@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, Vibration } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { processBenefitRedemption, processPointAccumulation } from '../../services/transactions';
-import Scanner from '../../components/BarcodeScanner/Scanner';
+import { EnhancedScanner as Scanner } from '../../components/BarcodeScanner';
 import { parseQrPayload } from '../../utils/qr';
 
 export default function ScannerScreen({ navigation }) {
@@ -10,12 +10,27 @@ export default function ScannerScreen({ navigation }) {
   const [scanning, setScanning] = useState(true);
   
   const handleScan = async (scanResult) => {
-    if (!scanResult?.data) return;
+    if (!scanResult?.data) {
+      console.log('Escaneo sin datos');
+      return;
+    }
+    
+    console.log('Datos escaneados:', scanResult.data);
+    // Vibrar para indicar que se detectó un código
+    Vibration.vibrate(100);
     setScanning(false);
     
     try {
+      // Mostrar los datos escaneados para debugging
+      Alert.alert(
+        'Código Detectado', 
+        `Datos: ${scanResult.data}\nTipo: ${scanResult.type || 'No disponible'}`,
+        [{ text: 'Continuar', style: 'default' }]
+      );
+      
       // Parse the QR code data
       const parsedQr = parseQrPayload(scanResult.data);
+      console.log('QR parseado:', JSON.stringify(parsedQr));
       
       // Handle different QR types
       switch(parsedQr.type) {
@@ -28,7 +43,7 @@ export default function ScannerScreen({ navigation }) {
         default:
           Alert.alert(
             'Código desconocido', 
-            'El formato del código QR no es compatible con esta aplicación.',
+            `El formato del código QR no es compatible: ${JSON.stringify(parsedQr)}`,
             [{ text: 'OK', onPress: () => setScanning(true) }]
           );
       }
@@ -97,7 +112,7 @@ export default function ScannerScreen({ navigation }) {
   return (
     <View style={styles.container}>
       {scanning ? (
-        <Scanner onScan={handleScan} onClose={closeScanner} />
+        <Scanner onBarcode={handleScan} onClose={closeScanner} />
       ) : (
         <View style={styles.resultContainer}>
           <Text style={styles.title}>Procesando código</Text>
@@ -112,28 +127,6 @@ export default function ScannerScreen({ navigation }) {
           </TouchableOpacity>
         </View>
       )}
-    </View>
-  );}
-  }
-    
-  return (
-    <View style={styles.container}>
-      {/* Use the new Scanner component */}
-      <Scanner onScan={handleScan} onError={handleScanError} />
-      
-      {/* Instructions overlay */}
-      <View style={styles.instructions}>
-        <Text style={styles.instructionText}>Escanea un código QR:</Text>
-        <Text style={styles.instructionDetail}>• BNF:SER-XXXX para canjear beneficio</Text>
-        <Text style={styles.instructionDetail}>• APP:DNI:CODIGO para registrar cliente</Text>
-        
-        {lastScannedCode && (
-          <View style={styles.lastScannedContainer}>
-            <Text style={styles.lastScannedTitle}>Último código escaneado:</Text>
-            <Text style={styles.lastScannedText}>{lastScannedCode}</Text>
-          </View>
-        )}
-      </View>
     </View>
   );
 }
@@ -181,10 +174,6 @@ const styles = StyleSheet.create({
     color: '#6200ee',
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
   },
   instructions: {
     position: 'absolute',

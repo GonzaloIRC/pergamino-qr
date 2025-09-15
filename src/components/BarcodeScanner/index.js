@@ -1,4 +1,7 @@
 import Scanner from './Scanner';
+import EnhancedScanner from './EnhancedScanner';
 
-export { Scanner };
-export default Scanner;
+// Exportamos el escáner mejorado como predeterminado
+export default EnhancedScanner;
+// También exportamos ambas versiones para compatibilidad
+export { Scanner, EnhancedScanner };
