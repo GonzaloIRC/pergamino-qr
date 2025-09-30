@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.pergamino.appmobile"
@@ -21,15 +23,14 @@
         "foregroundImage": "../../assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.pergamino.appmobile"
+      "package": "com.pergamino.appmobile",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "../../assets/favicon.png"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "pergamino-app-mobile"
-      }
     },
     "plugins": [
       [
@@ -38,6 +39,12 @@
           "cameraPermission": "Permite a PergaminoApp acceder a tu cámara para escanear códigos QR."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "be1c9412-6aba-4a2d-b9d9-76c94c5302ad"
+      }
+    },
+    "owner": "gonzaloirc"
   }
 }
