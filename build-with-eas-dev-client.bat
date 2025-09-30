@@ -24,12 +24,12 @@ echo       es posible que se te solicite crear credenciales para Android
 echo       o configurar opciones adicionales.
 echo.
 
-call npx eas build -p android --profile development --local
+call npx eas build -p android --profile development
 
 echo.
 echo ===================================================================
-echo PROCESO COMPLETADO. El APK generado se encuentra en la carpeta build/
-echo Para ejecutarlo, instálalo en tu dispositivo y luego ejecuta:
+echo PROCESO COMPLETADO. Una vez que el build termine en los servidores de EAS,
+echo podrás descargarlo desde el enlace que se te proporcionará. Después de instalarlo, ejecuta:
 echo.
 echo   npx expo start --dev-client
 echo.
