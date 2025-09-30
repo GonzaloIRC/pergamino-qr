@@ -23,7 +23,11 @@ echo NOTA: Este proceso enviará el proyecto a los servidores de EAS para su con
 echo       Una vez completado, podrás descargar el APK desde el enlace proporcionado.
 echo.
 
-call npx eas build --platform android --profile development --config=eas-minimal.json --non-interactive
+copy eas-minimal.json eas.json.bak
+copy eas-minimal.json eas.json
+call npx eas build --platform android --profile development --non-interactive
+copy eas.json.bak eas.json
+del eas.json.bak
 
 echo.
 echo ===================================================================
