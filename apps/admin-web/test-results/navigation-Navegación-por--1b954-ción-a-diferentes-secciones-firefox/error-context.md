@@ -1,0 +1,114 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e7] [cursor=pointer]:
+    - img [ref=e8] [cursor=pointer]
+  - alert [ref=e12]
+  - generic [ref=e13]:
+    - complementary [ref=e14]:
+      - navigation [ref=e15]:
+        - link "Dashboard" [ref=e16] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Analytics" [ref=e17] [cursor=pointer]:
+          - /url: /analytics
+        - link "Alerts" [ref=e18] [cursor=pointer]:
+          - /url: /alerts
+        - link "Clients" [ref=e19] [cursor=pointer]:
+          - /url: /clients
+        - link "Benefits" [ref=e20] [cursor=pointer]:
+          - /url: /benefits
+        - link "Serials" [ref=e21] [cursor=pointer]:
+          - /url: /serials
+        - link "History" [ref=e22] [cursor=pointer]:
+          - /url: /history
+        - link "Settings" [ref=e23] [cursor=pointer]:
+          - /url: /settings
+    - main [ref=e24]:
+      - generic [ref=e25]:
+        - heading "Panel de Control" [level=1] [ref=e26]
+        - generic [ref=e27]:
+          - article [ref=e28]:
+            - generic [ref=e29]:
+              - img [ref=e31]
+              - generic [ref=e34]:
+                - heading "Total Clientes" [level=2] [ref=e35]
+                - generic [ref=e37]: "10"
+          - article [ref=e38]:
+            - generic [ref=e39]:
+              - img [ref=e41]
+              - generic [ref=e44]:
+                - heading "Redenciones" [level=2] [ref=e45]
+                - generic [ref=e47]: "0"
+          - article [ref=e48]:
+            - generic [ref=e49]:
+              - img [ref=e51]
+              - generic [ref=e54]:
+                - heading "Alertas" [level=2] [ref=e55]
+                - generic [ref=e56]:
+                  - generic [ref=e57]: "3"
+                  - generic [ref=e58]: "+2"
+        - generic [ref=e59]:
+          - heading "Historial Reciente" [level=2] [ref=e60]
+          - table [ref=e62]:
+            - rowgroup [ref=e63]:
+              - row "Cliente Acción Fecha Estado" [ref=e64]:
+                - columnheader "Cliente" [ref=e65]
+                - columnheader "Acción" [ref=e66]
+                - columnheader "Fecha" [ref=e67]
+                - columnheader "Estado" [ref=e68]
+            - rowgroup [ref=e69]:
+              - row "No hay registros de historial reciente." [ref=e70]:
+                - cell "No hay registros de historial reciente." [ref=e71]
+        - heading "Actividad Reciente" [level=2] [ref=e72]
+        - table [ref=e74]:
+          - rowgroup [ref=e75]:
+            - row "Usuario Acción Fecha Estado" [ref=e76]:
+              - columnheader "Usuario" [ref=e77]
+              - columnheader "Acción" [ref=e78]
+              - columnheader "Fecha" [ref=e79]
+              - columnheader "Estado" [ref=e80]
+          - rowgroup [ref=e81]:
+            - row "M María López maria@example.com Redención de beneficio Café gratis Hace 5 minutos Completado" [ref=e82]:
+              - cell "M María López maria@example.com" [ref=e83]:
+                - generic [ref=e84]:
+                  - generic [ref=e85]: M
+                  - generic [ref=e86]:
+                    - generic [ref=e87]: María López
+                    - generic [ref=e88]: maria@example.com
+              - cell "Redención de beneficio Café gratis" [ref=e89]:
+                - generic [ref=e90]: Redención de beneficio
+                - generic [ref=e91]: Café gratis
+              - cell "Hace 5 minutos" [ref=e92]:
+                - generic [ref=e93]: Hace 5 minutos
+              - cell "Completado" [ref=e94]:
+                - generic [ref=e95]: Completado
+            - row "J Juan Pérez juan@example.com Acumulación de puntos Compra en tienda Hace 15 minutos Completado" [ref=e96]:
+              - cell "J Juan Pérez juan@example.com" [ref=e97]:
+                - generic [ref=e98]:
+                  - generic [ref=e99]: J
+                  - generic [ref=e100]:
+                    - generic [ref=e101]: Juan Pérez
+                    - generic [ref=e102]: juan@example.com
+              - cell "Acumulación de puntos Compra en tienda" [ref=e103]:
+                - generic [ref=e104]: Acumulación de puntos
+                - generic [ref=e105]: Compra en tienda
+              - cell "Hace 15 minutos" [ref=e106]:
+                - generic [ref=e107]: Hace 15 minutos
+              - cell "Completado" [ref=e108]:
+                - generic [ref=e109]: Completado
+            - row "R Rosa García rosa@example.com Intento de acceso Código QR inválido Hace 32 minutos Alerta" [ref=e110]:
+              - cell "R Rosa García rosa@example.com" [ref=e111]:
+                - generic [ref=e112]:
+                  - generic [ref=e113]: R
+                  - generic [ref=e114]:
+                    - generic [ref=e115]: Rosa García
+                    - generic [ref=e116]: rosa@example.com
+              - cell "Intento de acceso Código QR inválido" [ref=e117]:
+                - generic [ref=e118]: Intento de acceso
+                - generic [ref=e119]: Código QR inválido
+              - cell "Hace 32 minutos" [ref=e120]:
+                - generic [ref=e121]: Hace 32 minutos
+              - cell "Alerta" [ref=e122]:
+                - generic [ref=e123]: Alerta
+```
