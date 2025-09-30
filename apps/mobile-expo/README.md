@@ -32,9 +32,9 @@ Para desarrollar y probar rápidamente usando Expo Go:
 
 3. Escanea el código QR que aparece en la consola o en la página web que se abre
 
-### Opción 2: Build de desarrollo
+### Opción 2: Build local de desarrollo
 
-Para crear un build de desarrollo que puedes instalar directamente en tu dispositivo:
+Para crear un build local de desarrollo que puedes instalar directamente en tu dispositivo:
 
 1. Desde la raíz del proyecto, ejecuta:
 
@@ -43,6 +43,26 @@ Para crear un build de desarrollo que puedes instalar directamente en tu disposi
 ```
 
 2. Una vez completado el proceso, encontrarás el archivo APK que puedes instalar en tu dispositivo Android
+
+### Opción 3: Build con EAS Development Client (recomendado)
+
+Para crear un build nativo más estable usando EAS (Expo Application Services):
+
+1. Desde la raíz del proyecto, ejecuta:
+
+```bash
+./build-with-eas-dev-client.bat
+```
+
+2. Sigue las instrucciones para iniciar sesión en EAS si es necesario
+3. Una vez que el build esté listo, descárgalo e instálalo en tu dispositivo
+4. Para conectarte a tu servidor de desarrollo, ejecuta:
+
+```bash
+./start-with-dev-client.bat
+```
+
+5. Abre la aplicación en tu dispositivo y escanea el QR code o conéctate manualmente
 
 ## Notas importantes
 
