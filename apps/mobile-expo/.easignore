@@ -1,0 +1,31 @@
+# Ignora por defecto archivos grandes y caches
+node_modules
+.expo
+.expo-shared
+npm-debug.log*
+yarn.lock
+pnpm-lock.yaml
+*.log
+
+# Incluye solo fuentes móviles
+# (Si usas TypeScript/tsconfig ajusta según tu estructura)
+!.easignore
+!eas.json
+!app.json
+!app.config.ts
+!package.json
+!babel.config.js
+!metro.config.js
+!index.js
+!index.ts
+!App.js
+!App.tsx
+!src/**
+!assets/**
+!components/**
+!utils/**
+
+# Ignorar archivos sensibles
+android-credentials*.json
+*secrets*.json
+*credentials*.json
