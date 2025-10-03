@@ -1,0 +1,11 @@
+{
+  "name": "shared-firebase",
+  "version": "1.0.0",
+  "description": "Funciones compartidas de Firebase para la app Pergamino",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "type": "module",
+  "dependencies": {
+    "firebase": "^10.0.0"
+  }
+}
