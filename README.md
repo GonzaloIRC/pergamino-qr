@@ -1,97 +1,33 @@
-# Pergamino App - Versión TrackingTable
+# Pergamino QR
 
-## Descripción
-Aplicación móvil completa para fidelización de clientes en restaurantes, con roles Cliente, Mesero y Admin. Sistema completo de puntos, campañas y gestión de mesas.
+## Ejecutar la aplicación móvil con Expo Go
 
-## Estado Actual del Proyecto
+Este proyecto incluye la aplicación móvil de Pergamino. Para probarla con Expo Go sin necesidad de compilar código nativo, sigue estos pasos:
 
-### Milestone 0 (Completo)
-✅ Implementación de roles (Cliente, Mesero, Admin)
-✅ Configuración base de Firebase
-✅ Reglas de seguridad en Firestore implementadas
-✅ Correcciones de imports y configuración
+1. **Clona el repositorio** y navega hasta la raíz del proyecto.
+2. **Instala las dependencias**:
+   ```bash
+   npm install
+   ```
+3. **Limpia los cachés** para evitar conflictos con dependencias anteriores:
+   ```bash
+   npx expo start -c
+   ```
+4. **Inicia el servidor de desarrollo**:
+   ```bash
+   npx expo start
+   ```
+   Se abrirá el panel de Expo. Escanea el código QR con la app **Expo Go** en un dispositivo físico para cargar la app.
 
-### Milestone 1 (En Desarrollo)
-🔄 Escáner QR para clientes
-🔄 Registro completo de clientes
-🔄 Sistema de roles con autenticación mejorada
-🔄 Panel administrador para gestión de clientes
+## Resolución de problemas comunes
 
-## Estructura del Proyecto
-### Cliente
-- `screens/cliente/QRScanner.js`: Escaneo de códigos QR de mesas
-- `screens/auth/RegisterClient.js`: Registro completo de clientes
+- Si aparecen errores de versiones incompatibles de React Native o React, verifica que las versiones estén fijadas en la sección `overrides` de `package.json`. Ejecuta `npm install` nuevamente para asegurarte de que se respeten las versiones bloqueadas.
+- Si la app no se inicia o ves un error de bundler, ejecuta `expo doctor` para diagnosticar el entorno y sigue las recomendaciones. También puedes borrar la caché de Metro ejecutando `npx expo start -c` y, en último caso, eliminar la carpeta `node_modules` y reinstalar las dependencias.
 
-### Mesero
-- `screens/mesero/ValidarQR.js`: Verificación de clientes en mesa
-- `screens/mesero/RegistrarConsumo.js`: Registro de consumos con cálculo de puntos
-- `components/auth/PINAccess.js`: Acceso por PIN para meseros
+## Scripts útiles
 
-### Admin
-- `screens/admin/AdminDashboard.js`: Panel principal de administración
-- `screens/admin/CampanasScreen.js`: CRUD completo de campañas de fidelización
-- `screens/admin/GenerarQRScreen.js`: Generador de códigos QR para mesas
+- `npm run android` – arranca la app en un emulador de Android (requiere Android Studio configurado).
+- `npm run ios` – arranca la app en un simulador de iOS (solo disponible en macOS).
+- `npm run start` – alias de `expo start` para arrancar el servidor de desarrollo.
 
-### Seguridad y Configuración
-- `firebase/firestore.rules`: Reglas de seguridad de Firestore
-- `services/firebaseClient.js`: Cliente Firebase configurado
-- `services/authService.js`: Servicio de autenticación
-
-## Firebase
-Colecciones implementadas con seguridad basada en roles:
-- `clientes`: { nombre, telefono, email, mesa, puntos, fechaRegistro, estado, rol }
-- `campañas`: { nombre, descripcion, puntosRequeridos, premio, activa, fechas }
-- `consumos`: { clienteId, mesa, productos, total, puntosGanados, fecha, mesero }
-- `usuarios`: { uid, email, rol, createdAt }
-
-## Características Implementadas
-✅ Sistema de autenticación con roles
-✅ Reglas de seguridad en Firestore
-✅ Importaciones Firebase estandarizadas
-✅ Estructura de proyecto mejorada
-✅ Configuración de Babel optimizada
-
-## Próximas Características (M1)
-🔜 Escáner QR mejorado para clientes y meseros
-🔜 Registro completo de clientes con validación
-🔜 Sistema de puntos (1 punto por cada $1000)
-🔜 Gestión de clientes en panel de administración
-🔜 Sistema de autenticación mejorado
-
-## Cómo ejecutar
-1. Instalar dependencias:
-```bash
-npm install
-npx expo install expo-barcode-scanner react-native-qrcode-svg react-native-svg
-```
-
-2. Iniciar la app:
-```bash
-npx expo start
-```
-
-## Documentación
-- `docs/M1_ALCANCE.md`: Descripción detallada del alcance de M1
-- `docs/M1_PLAN_IMPLEMENTACION.md`: Plan de implementación para M1
-- `docs/M1_GUIA_TECNICA.md`: Guía técnica para desarrolladores
-- `AGENT_AUDIT.md`: Auditoría viva de seguridad y calidad del proyecto
-
-## Seguridad
-- Implementadas reglas de seguridad en Firestore basadas en roles
-- PIN temporal para mesero/admin: `1234` (será reemplazado por autenticación completa)
-
-## Notas
-- Las campañas pueden personalizarse desde Firebase o más adelante mediante panel web.
-- Para consultas técnicas, revisar la documentación en la carpeta `docs/`
-
-## Desarrollo (Expo Dev Client)
-
-Ejecutar emuladores Firebase: npm run emulators:start
-
-Iniciar app en dispositivo físico: npx expo start --dev-client
-
-Semillas: node scripts/seedBeneficioDemo.js
-
-Variables: usar .env.local con EXPO_PUBLIC_*
-
-Escáner: expo-camera (prohibido expo-barcode-scanner)
+Para más información sobre la estructura del proyecto y las reglas de seguridad de Firestore, consulta los archivos de la carpeta `firebase` y el documento `SECURITY.md`.
