@@ -29,6 +29,7 @@ service cloud.firestore {
     match /roles/{userId} {
       allow read: if isAuthed() && (request.auth.uid == userId || isAdmin());
       allow write: if isAuthed() && isAdmin();
+      allow write: if isAuthed() && isAdmin();
     }
     
     // Ajustes (lectura para todos autenticados; escritura solo admin)
@@ -37,10 +38,18 @@ service cloud.firestore {
       allow write: if isAuthed() && isAdmin();
     }
 
-    // Clientes (ID = DNI): lectura/escritura para waiter/admin
+    // Clientes (ID = DNI): antiduplicado + control de creación/actualización
     match /Clientes/{dni} {
       allow read: if isAuthed();
-      allow write: if isAuthed() && isWaiterOrAdmin();
+      
+      // Creación: solo si el DNI no existe y el usuario es dueño
+      allow create: if isAuthed()
+        && request.resource.id == request.resource.data.dni
+        && !exists(/databases/$(database)/documents/Clientes/$(dni))
+        && request.resource.data.uid == request.auth.uid;
+      
+      // Solo admin puede actualizar o borrar (p.ej. reasignar DNI)
+      allow update, delete: if isAuthed() && isAdmin();
     }
 
     // Beneficios: lectura autenticada; escritura solo admin
@@ -69,8 +78,13 @@ service cloud.firestore {
       allow write: if isAuthed() && isAdmin();
     }
     
-    // Alertas: solo admin (registro de posibles fraudes)
+    // Alertas: solo admin (registro de posibles fraudes - colección antigua)
     match /Alertas/{id} {
+      allow read, write: if isAuthed() && isAdmin();
+    }
+    
+    // Alerts: solo admin (nuevo sistema de alertas)
+    match /Alerts/{id} {
       allow read, write: if isAuthed() && isAdmin();
     }
 
