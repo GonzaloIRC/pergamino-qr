@@ -1,0 +1,9 @@
+- ✅ Expo 53 / RN 0.79.5
+- ✅ Solo expo-camera (sin expo-barcode-scanner)
+- ✅ app.config.ts único
+- ✅ firebaseClient único
+- ❌ QR dinámico QrDynamicCard
+- ✅ Seeds SER-0001..SER-0020
+- ❌ Roles/guards
+- ❌ Ajustes/global + useSettings()
+- ❌ Historial con filtros

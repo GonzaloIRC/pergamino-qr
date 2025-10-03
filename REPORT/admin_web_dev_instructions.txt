@@ -1,0 +1,3 @@
+﻿# Ejecuta desde apps/admin-web: 
+pm run dev y copia las primeras 20 líneas aquí o usa Tee-Object
+

@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "apps/admin-web/package.json", "use": "@vercel/next" }
+  ],
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/apps/admin-web/$1" }
+  ],
+  "redirects": [
+    { "source": "/", "destination": "/dashboard", "permanent": false }
+  ],
+  "env": {
+    "NEXT_PUBLIC_APP_ENV": "production"
+  },
+  "github": {
+    "enabled": true,
+    "silent": true
+  }
+}

@@ -1,0 +1,69 @@
+﻿Listado de rutas de carpetas
+El n·mero de serie del volumen es 54AD-1181
+C:.
+|   .env.local.example
+|   COMPLETION_GUIDE.md
+|   firestore.indexes.json
+|   next.config.js
+|   package.json
+|   postcss.config.js
+|   README.md
+|   tailwind.config.js
+|   tsconfig.json
+|   
+\---app
+    |   globals.css
+    |   layout.tsx
+    |   metadata.ts
+    |   page.tsx
+    |   
+    +---api
+    +---benefits
+    |       layout.tsx
+    |       page.tsx
+    |       
+    +---clients
+    |       layout.tsx
+    |       page.tsx
+    |       
+    +---components
+    |       AdminLayout.tsx
+    |       ExportCSVButton.tsx
+    |       Header.tsx
+    |       HistoryFilters.tsx
+    |       ImportCSVButton.tsx
+    |       SerialGenerator.tsx
+    |       Sidebar.tsx
+    |       
+    +---dashboard
+    |       layout.tsx
+    |       page.tsx
+    |       
+    +---history
+    |       layout.tsx
+    |       page.tsx
+    |       
+    +---lib
+    |       auth.tsx
+    |       csv.ts
+    |       firebase.ts
+    |       firestore.ts
+    |       roleGuard.tsx
+    |       settings.ts
+    |       useSettings.ts
+    |       
+    +---login
+    |       layout.tsx
+    |       page.tsx
+    |       
+    +---serials
+    |       layout.tsx
+    |       page.tsx
+    |       
+    +---settings
+    |       layout.tsx
+    |       page.tsx
+    |       
+    \---types
+            next-navigation.d.ts
+            
