@@ -9,10 +9,24 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Clientes: lectura y escritura autenticada (rol se gestiona en app)
+    // Clientes: lectura con autenticación y escritura con DNI único
+    // Requiere que el ID de documento coincida con el DNI, que el campo dni del recurso
+    // coincida con el parámetro y que se asocie el uid del usuario autenticado.
     match /Clientes/{dni} {
       allow read: if isAuthed();
-      allow write: if isAuthed();
+      allow create: if isAuthed()
+        && request.resource.id == dni
+        && request.resource.data.dni == dni
+        && request.resource.data.uid == request.auth.uid
+        && !exists(/databases/$(database)/documents/Clientes/$(dni));
+      allow update: if isAuthed()
+        && request.resource.data.dni == dni
+        && request.resource.data.uid == request.auth.uid;
+    }
+
+    // Perfiles: cada usuario puede leer/modificar su propio perfil
+    match /Perfiles/{uid} {
+      allow read, write: if isAuthed() && uid == request.auth.uid;
     }
 
     // Beneficios: solo lectura
