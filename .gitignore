@@ -81,3 +81,4 @@ scripts/*.png
 
 # Archivos específicos del proyecto
 app.json.backup
+test-users.json
