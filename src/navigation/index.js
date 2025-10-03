@@ -1,15 +1,19 @@
-﻿import React from 'react';
+﻿import React, { useContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { useAuth } from '../context/AuthContext';
+import { AuthContext } from '../context/AuthContext';
 import AuthNavigator from './AuthNavigator';
-import MainNavigator from './MainNavigator';
+import RoleBasedNavigator from './RoleBasedNavigator';
 
+/**
+ * Componente principal de navegación que controla el flujo entre autenticación
+ * y navegación basada en roles para usuarios autenticados
+ */
 export default function RootNavigation() {
-  const { user } = useAuth();
+  const { user } = useContext(AuthContext);
   
   return (
     <NavigationContainer>
-      {user ? <MainNavigator /> : <AuthNavigator />}
+      {user ? <RoleBasedNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 }

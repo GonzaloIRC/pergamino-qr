@@ -1,11 +1,24 @@
 // src/navigation/RouteGuards.js
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
-import { useAuth } from '../context/AuthContext';
+import { AuthContext } from '../context/AuthContext';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { db } from '../services/firebaseClient';
 
-// Component that only shows its children if the user is authenticated
+/**
+ * Componente que solo muestra sus children si el usuario está autenticado
+ */
 export function RequireAuth({ children }) {
-  const { user } = useAuth();
+  const { user, isLoading } = useContext(AuthContext);
+  
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text style={{ marginTop: 20 }}>Verificando autenticación...</Text>
+      </View>
+    );
+  }
   
   if (!user) {
     return (
@@ -20,24 +33,75 @@ export function RequireAuth({ children }) {
   return children;
 }
 
-// Component that only shows its children if the user has the specified role
-export function RequireRole({ children, role }) {
-  const { role: userRole } = useAuth();
-  
-  // Role can be a string or an array of allowed roles
-  const hasPermission = Array.isArray(role)
-    ? role.includes(userRole)
-    : (role === userRole);
+/**
+ * Higher-Order Component que verifica si el usuario tiene los roles requeridos
+ * @param {string|string[]} allowedRoles - Rol o roles permitidos
+ * @param {React.Component} Component - Componente a envolver
+ * @returns {React.Component} Componente con verificación de roles
+ */
+export function RequireRole(allowedRoles, Component) {
+  // Devuelve un nuevo componente funcional
+  return function RoleWrapper(props) {
+    const { user } = useContext(AuthContext);
+    const [role, setRole] = useState(null);
+    const [loading, setLoading] = useState(true);
     
-  if (!hasPermission) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-        <Text style={{ marginBottom: 20, fontSize: 18 }}>
-          No tienes permisos para acceder a esta sección
-        </Text>
-			</View>
-		);
-	}
-	
-	return children;
+    // Cargar el rol del usuario desde Firestore
+    useEffect(() => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+      
+      // Referencia al documento de rol
+      const roleRef = doc(db, 'roles', user.uid);
+      
+      // Suscripción a cambios en tiempo real
+      const unsubscribe = onSnapshot(
+        roleRef, 
+        (snapshot) => {
+          if (snapshot.exists()) {
+            setRole(snapshot.data().role);
+          } else {
+            setRole('customer'); // Rol por defecto
+          }
+          setLoading(false);
+        },
+        (error) => {
+          console.error('Error al cargar el rol:', error);
+          setRole('customer'); // Rol por defecto en caso de error
+          setLoading(false);
+        }
+      );
+      
+      return () => unsubscribe();
+    }, [user]);
+    
+    if (loading) {
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <ActivityIndicator size="large" color="#0000ff" />
+          <Text style={{ marginTop: 20 }}>Verificando permisos...</Text>
+        </View>
+      );
+    }
+    
+    // Role puede ser un string o un array de roles permitidos
+    const hasPermission = Array.isArray(allowedRoles)
+      ? allowedRoles.includes(role)
+      : (allowedRoles === role);
+      
+    if (!hasPermission) {
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <Text style={{ marginBottom: 20, fontSize: 18 }}>
+            No tienes permisos para acceder a esta sección
+          </Text>
+        </View>
+      );
+    }
+    
+    // Pasar todas las props al componente original
+    return <Component {...props} />;
+  };
 }

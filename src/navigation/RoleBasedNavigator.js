@@ -14,12 +14,16 @@ import AdminDashboard from '../screens/AdminDashboard';
 import HistoryScreen from '../screens/admin/HistoryScreen';
 import AnalyticsScreen from '../screens/admin/AnalyticsScreen';
 import ConfigScreen from '../screens/admin/ConfigScreen';
+import CustomersScreen from '../screens/admin/CustomersScreen';
 import FraudAlertsScreen from '../screens/admin/FraudAlertsScreen';
+
+// Nuevas pantallas web para analytics y alertas
+import AnalyticsPage from '../pages/AnalyticsPage';
+import AlertsPage from '../pages/AlertsPage';
 
 // Pantallas compartidas
 import ScannerScreen from '../screens/main/ScannerScreen';
-import ProfileScreen from '../screens/ProfileScreen';
-import ReferralsScreen from '../screens/ReferralsScreen';
+import ProfileScreen from '../screens/main/ProfileScreen';
 
 // Navegadores
 const Tab = createBottomTabNavigator();
@@ -28,40 +32,63 @@ const WaiterStack = createNativeStackNavigator();
 const CustomerStack = createNativeStackNavigator();
 
 // Navegador específico para administradores
-const AdminStackNavigator = () => (
-  <AdminStack.Navigator>
-    <AdminStack.Screen 
-      name="Dashboard" 
-      component={AdminDashboard} 
-      options={{ headerTitle: 'Panel de Administración' }}
-    />
-    <AdminStack.Screen 
-      name="History" 
-      component={HistoryScreen} 
-      options={{ headerTitle: 'Historial de Transacciones' }}
-    />
-    <AdminStack.Screen 
-      name="Analytics" 
-      component={AnalyticsScreen} 
-      options={{ headerTitle: 'Analítica' }}
-    />
-    <AdminStack.Screen 
-      name="Config" 
-      component={ConfigScreen} 
-      options={{ headerTitle: 'Configuración' }}
-    />
-    <AdminStack.Screen 
-      name="Scanner" 
-      component={ScannerScreen} 
-      options={{ headerTitle: 'Escanear QR' }}
-    />
-    <AdminStack.Screen 
-      name="FraudAlerts" 
-      component={FraudAlertsScreen} 
-      options={{ headerTitle: 'Alertas de Fraude' }}
-    />
-  </AdminStack.Navigator>
-);
+const AdminStackNavigator = () => {
+  const { isPlatformWeb } = useContext(AuthContext);
+  
+  return (
+    <AdminStack.Navigator>
+      {isPlatformWeb ? (
+        // Pantallas específicas para la versión web (panel administrativo)
+        <>
+          <AdminStack.Screen 
+            name="AnalyticsPage" 
+            component={AnalyticsPage} 
+            options={{ headerTitle: 'Panel de Analytics' }}
+          />
+          <AdminStack.Screen 
+            name="AlertsPage" 
+            component={AlertsPage} 
+            options={{ headerTitle: 'Alertas de Seguridad' }}
+          />
+        </>
+      ) : (
+        // Pantallas para la versión móvil
+        <>
+          <AdminStack.Screen 
+            name="Dashboard" 
+            component={AdminDashboard} 
+            options={{ headerTitle: 'Panel de Administración' }}
+          />
+          <AdminStack.Screen 
+            name="History" 
+            component={HistoryScreen} 
+            options={{ headerTitle: 'Historial de Transacciones' }}
+          />
+          <AdminStack.Screen 
+            name="Analytics" 
+            component={AnalyticsScreen} 
+            options={{ headerTitle: 'Analítica' }}
+          />
+          <AdminStack.Screen 
+            name="Config" 
+            component={ConfigScreen} 
+            options={{ headerTitle: 'Configuración' }}
+          />
+          <AdminStack.Screen 
+            name="Scanner" 
+            component={ScannerScreen} 
+            options={{ headerTitle: 'Escanear QR' }}
+          />
+          <AdminStack.Screen 
+            name="FraudAlerts" 
+            component={FraudAlertsScreen} 
+            options={{ headerTitle: 'Alertas de Fraude' }}
+          />
+        </>
+      )}
+    </AdminStack.Navigator>
+  );
+};
 
 // Navegador específico para meseros
 const WaiterStackNavigator = () => (
@@ -102,12 +129,12 @@ const CustomerStackNavigator = () => (
 
 // Navegador principal basado en roles
 export default function RoleBasedNavigator() {
-  const { userRole } = useContext(AuthContext);
+  const { role } = useContext(AuthContext);
   
   // Determinar la pestaña inicial basada en el rol del usuario
-  let initialRouteName = 'Cliente';
-  if (userRole === 'admin') initialRouteName = 'Admin';
-  else if (userRole === 'waiter' || userRole === 'mesero') initialRouteName = 'Mesero';
+  let initialRouteName = 'CustomerDashboard';
+  if (role === 'admin') initialRouteName = 'Admin';
+  else if (role === 'waiter') initialRouteName = 'Scanner';
   
   return (
     <Tab.Navigator
@@ -118,10 +145,12 @@ export default function RoleBasedNavigator() {
           
           if (route.name === 'Admin') {
             iconName = focused ? 'settings' : 'settings-outline';
-          } else if (route.name === 'Mesero') {
-            iconName = focused ? 'restaurant' : 'restaurant-outline';
-          } else if (route.name === 'Cliente') {
-            iconName = focused ? 'person' : 'person-outline';
+          } else if (route.name === 'Scanner') {
+            iconName = focused ? 'qr-code' : 'qr-code-outline';
+          } else if (route.name === 'CustomerDashboard') {
+            iconName = focused ? 'home' : 'home-outline';
+          } else if (route.name === 'Customers') {
+            iconName = focused ? 'people' : 'people-outline';
           }
           
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -130,31 +159,46 @@ export default function RoleBasedNavigator() {
         tabBarInactiveTintColor: 'gray',
       })}
     >
+      {/* Tab para el dashboard de clientes - visible para todos */}
+      <Tab.Screen
+        name="CustomerDashboard"
+        component={CustomerStackNavigator}
+        options={{ 
+          tabBarLabel: 'Mi Cuenta', 
+          headerShown: false
+        }}
+      />
+      
+      {/* Tab para escanear - visible para waiter y admin */}
+      <Tab.Screen
+        name="Scanner"
+        component={RequireRole(['waiter', 'admin'], ScannerScreen)}
+        options={{ 
+          tabBarLabel: 'Escanear',
+          headerTitle: 'Escáner QR',
+          tabBarStyle: { display: (role === 'waiter' || role === 'admin') ? 'flex' : 'none' }
+        }}
+      />
+      
+      {/* Tab para gestión de clientes - visible para admin */}
+      <Tab.Screen
+        name="Customers"
+        component={RequireRole(['admin'], CustomersScreen)}
+        options={{ 
+          tabBarLabel: 'Clientes',
+          headerTitle: 'Gestión de Clientes',
+          tabBarStyle: { display: role === 'admin' ? 'flex' : 'none' }
+        }}
+      />
+      
+      {/* Tab para administración - visible para admin */}
       <Tab.Screen
         name="Admin"
         component={RequireRole(['admin'], AdminStackNavigator)}
         options={{ 
           tabBarLabel: 'Admin', 
           headerShown: false,
-          tabBarStyle: { display: userRole === 'admin' ? 'flex' : 'none' }
-        }}
-      />
-      <Tab.Screen
-        name="Mesero"
-        component={RequireRole(['waiter', 'mesero'], WaiterStackNavigator)}
-        options={{ 
-          tabBarLabel: 'Mesero', 
-          headerShown: false,
-          tabBarStyle: { display: (userRole === 'waiter' || userRole === 'mesero') ? 'flex' : 'none' }
-        }}
-      />
-      <Tab.Screen
-        name="Cliente"
-        component={RequireRole(['cliente', 'customer'], CustomerStackNavigator)}
-        options={{ 
-          tabBarLabel: 'Cliente', 
-          headerShown: false,
-          tabBarStyle: { display: (userRole === 'cliente' || userRole === 'customer') ? 'flex' : 'none' }
+          tabBarStyle: { display: role === 'admin' ? 'flex' : 'none' }
         }}
       />
     </Tab.Navigator>

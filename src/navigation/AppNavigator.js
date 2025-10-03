@@ -1,61 +1,40 @@
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider as PaperProvider } from 'react-native-paper';
-import { RequireAuth, RequireRole } from './RouteGuards';
-import { AuthContext } from '../context/AuthContext';
+import { RequireAuth } from './RouteGuards';
+import RoleBasedNavigator from './RoleBasedNavigator';
+import WebAdminNavigator from './WebAdminNavigator';
+import { useAuth } from '../context/AuthContext';
 
 import Landing from '../screens/Landing';
 import Onboarding from '../screens/Onboarding';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
-import AdminDashboard from '../screens/AdminDashboard';
-import WaiterDashboard from '../screens/WaiterDashboard';
-import CustomerDashboard from '../screens/CustomerDashboard';
 import Settings from '../screens/Settings';
 import Campaigns from '../screens/Campaigns';
 import Customers from '../screens/Customers';
 import Reports from '../screens/Reports';
 import CustomerListScreen from '../screens/CustomerListScreen';
 import CustomerDetailScreen from '../screens/CustomerDetailScreen';
-import TrackingDashboard from '../screens/TrackingDashboard';
 
 const Stack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
-
-function MainTabs() {
-  const { userRole } = useContext(AuthContext);
-  
-  // Determinar qué pestaña mostrar inicialmente según el rol
-  let initialRouteName = "Customer"; // Por defecto, mostrar la pestaña Cliente
-  
-  return (
-    <Tab.Navigator
-      initialRouteName={initialRouteName}
-    >
-      <Tab.Screen
-        name="Admin"
-        component={RequireRole(['admin'], AdminDashboard)}
-        options={{ tabBarLabel: 'Admin', headerTitle: 'Panel Admin' }}
-      />
-      <Tab.Screen
-        name="Waiter"
-        component={RequireRole(['waiter'], WaiterDashboard)}
-        options={{ tabBarLabel: 'Mesero', headerTitle: 'Panel Mesero' }}
-      />
-      <Tab.Screen
-        name="Customer"
-        component={RequireRole(['cliente', 'customer'], CustomerDashboard)}
-        options={{ tabBarLabel: 'Cliente', headerTitle: 'Mi Cuenta' }}
-      />
-    </Tab.Navigator>
-  );
-}
 
 export default function AppNavigator() {
+  const { isPlatformWeb, role } = useAuth();
+  
+  // Si estamos en web y el usuario es administrador, mostramos el panel web
+  if (isPlatformWeb && role === 'admin') {
+    return (
+      <NavigationContainer>
+        <WebAdminNavigator />
+      </NavigationContainer>
+    );
+  }
+  
+  // Si no, mostramos la navegación normal para la app móvil
   return (
     <SafeAreaProvider>
       <PaperProvider>
@@ -65,24 +44,23 @@ export default function AppNavigator() {
             <Stack.Screen name="Onboarding" component={Onboarding} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
-            <Stack.Screen name="MainTabs" component={RequireAuth(MainTabs)} options={{ headerShown: false }} />
+            <Stack.Screen 
+              name="MainTabs" 
+              component={RequireAuth(RoleBasedNavigator)} 
+              options={{ headerShown: false }} 
+            />
             <Stack.Screen name="Settings" component={RequireAuth(Settings)} />
             <Stack.Screen name="Campaigns" component={RequireAuth(Campaigns)} />
             <Stack.Screen name="Customers" component={RequireAuth(Customers)} />
             <Stack.Screen name="Reports" component={RequireAuth(Reports)} />
             <Stack.Screen 
-              name="TrackingDashboard" 
-              component={RequireAuth(RequireRole(['admin'], TrackingDashboard))}
-              options={{ title: "Dashboard de Tracking" }}
-            />
-            <Stack.Screen 
               name="CustomerList" 
-              component={RequireAuth(RequireRole(['admin', 'waiter'], CustomerListScreen))}
+              component={RequireAuth(CustomerListScreen)}
               options={{ title: "Clientes" }}
             />
             <Stack.Screen 
               name="CustomerDetail" 
-              component={RequireAuth(RequireRole(['admin', 'waiter'], CustomerDetailScreen))}
+              component={RequireAuth(CustomerDetailScreen)}
               options={{ headerShown: false }}
             />
           </Stack.Navigator>
