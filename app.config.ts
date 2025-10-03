@@ -5,9 +5,13 @@ const config: ExpoConfig = {
   name: 'PergaminoApp',
   slug: 'pergamino-app',
   version: '1.0.0',
-  scheme: 'pergamino',
+  scheme: 'exp+pergamino-app',
   owner: undefined,
   extra: {
+    // EAS
+    eas: {
+      projectId: "fbf2a674-89ee-45f3-a899-6c4eccceeee7"
+    },
     // Firebase (usamos .env.local con EXPO_PUBLIC_*)
     EXPO_PUBLIC_USE_EMULATORS: process.env.EXPO_PUBLIC_USE_EMULATORS ?? 'false',
     EXPO_PUBLIC_FIREBASE_PROJECT_ID: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
@@ -28,8 +32,6 @@ const config: ExpoConfig = {
   },
   android: {
     package: 'com.gonzaloirc.pergaminoapp',
-    compileSdkVersion: 35,
-    targetSdkVersion: 35,
     permissions: [
       'CAMERA',
       'INTERNET',
@@ -42,7 +44,10 @@ const config: ExpoConfig = {
     intentFilters: [
       {
         action: 'VIEW',
-        data: [{ scheme: 'pergamino', host: '*' }],
+        data: [
+          { scheme: 'pergamino', host: '*' },
+          { scheme: 'exp+pergamino-app', host: '*' }
+        ],
         category: ['BROWSABLE', 'DEFAULT'],
       },
     ],
