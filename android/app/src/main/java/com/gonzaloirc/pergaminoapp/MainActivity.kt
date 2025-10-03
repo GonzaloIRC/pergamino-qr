@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:android/app/src/main/java/com/pergamino/MainActivity.kt
-package com.pergamino
-========
-package com.pergamino.app
->>>>>>>> origin/main:android/app/src/main/java/com/pergamino/app/MainActivity.kt
+package com.gonzaloirc.pergaminoapp
 
 import android.os.Build
 import android.os.Bundle
