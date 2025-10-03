@@ -1,0 +1,77 @@
+/**
+ * Mobile App Smoke Test
+ * 
+ * This test script is designed to be run using Maestro (https://maestro.mobile.dev/),
+ * a mobile UI testing framework that works with both iOS and Android.
+ * 
+ * Installation instructions:
+ * 1. Install Maestro CLI: curl -Ls "https://get.maestro.mobile.dev" | bash
+ * 2. For Android, ensure you have an emulator running or a device connected
+ * 3. For iOS, ensure you have Xcode and a simulator running
+ * 
+ * To run this test:
+ * maestro test tests/mobile/app-smoke-test.yaml
+ */
+
+flow:
+  name: Pergamino Mobile App Smoke Test
+
+  appId: com.pergamino.app # Replace with your actual app ID/bundle ID
+
+  # Verify app starts correctly
+  - launchApp:
+      clearState: true
+  
+  # Check login screen appears
+  - waitForAnimationToEnd:
+      timeout: 5000
+  
+  - assertVisible: "Iniciar Sesión"
+  
+  # Login test with test credentials
+  - tapOn: "Email"
+  - inputText: ${TEST_EMAIL}
+  - hideKeyboard
+  
+  - tapOn: "Contraseña"
+  - inputText: ${TEST_PASSWORD}
+  - hideKeyboard
+  
+  - tapOn: "Iniciar Sesión"
+  
+  # Wait for main screen to load
+  - waitForAnimationToEnd:
+      timeout: 5000
+  
+  # Check main screen elements
+  - assertVisible: "Mi Cuenta"
+  
+  # Test navigation
+  - tapOn: "Mi Cuenta"
+  - assertVisible: "Información Personal"
+  
+  - back
+  
+  # Test transaction history
+  - tapOn: "Historial"
+  - assertVisible: "Transacciones"
+  
+  - back
+  
+  # Check notifications
+  - tapOn: "Notificaciones"
+  - assertVisible: "Notificaciones"
+  
+  - back
+  
+  # Test logout
+  - tapOn: "Mi Cuenta"
+  - scrollUntilVisible:
+      element: "Cerrar Sesión"
+      direction: DOWN
+  
+  - tapOn: "Cerrar Sesión"
+  - tapOn: "Confirmar"
+  
+  # Verify we're back at login screen
+  - assertVisible: "Iniciar Sesión"
