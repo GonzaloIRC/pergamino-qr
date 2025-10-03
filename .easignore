@@ -1,0 +1,23 @@
+# Archivos y carpetas ignorados por EAS Build
+# Este archivo evita subir artefactos y secretos innecesarios al servidor de build.
+
+# Directorios generados automáticamente
+node_modules
+android
+ios
+
+# Archivos de credenciales y llaves
+*.jks
+**/google-services.json
+**/serviceAccount*.json
+*.p8
+*.cer
+*.pem
+
+# Variables de entorno
+.env
+.env.*
+
+# Backups y archivos temporales
+*.bak
+*.tmp
