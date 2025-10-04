@@ -1,5 +1,7 @@
 # Pergamino App - Versión TrackingTable
 
+> 📋 **¿Buscas entender el objetivo del proyecto?** Lee primero [OBJETIVO.md](OBJETIVO.md) para una visión clara del propósito, usuarios y alcance del repositorio.
+
 ## Descripción
 Aplicación móvil completa para fidelización de clientes en restaurantes, con roles Cliente, Mesero y Admin. Sistema completo de puntos, campañas y gestión de mesas.
 
