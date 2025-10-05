@@ -1,44 +1,50 @@
-.expo/
-# Logs
-logs
+﻿# Node / Builds / Reports
+node_modules/
+dist/
+build/
+.next/
+coverage/
+playwright-report/
+test-results/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-# Dependencias
-node_modules
-dist
-dist-ssr
-*.local
+# Expo / React Native
+.expo/
+.expo-shared/
+*.apk
+*.aab
 
-# Archivos de entorno y secretos
+# EAS
+.eas/build/
+.eas/cache/
+.eas/local.json
+
+# Environments & Secrets (NO subir)
 .env
 .env.*
-!.env.example
-!.env.test.example
-serviceAccount*.json
+.env.local
+.env.*.local
+service-account*.json
+*.jks
+*.keystore
+*.p12
+*.pem
+android-credentials-backup.json
 
-# Playwright
-test-results/
-playwright-report/
-blob-report/
-playwright/.cache/
-!serviceAccount*.example.json
-*credentials*.json
-*.secret*
-google*.json
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# IDE / OS
+.vscode/
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-.expo/
+Thumbs.db
+
+# Backups / Copias
+*.bak
+*.old
+*backup*
+*copia*
+*copy*
+*respaldo*
+*.tmp
+*.orig
+leeme*.txt
+LEEME*.txt
+readme (copia)*.md
