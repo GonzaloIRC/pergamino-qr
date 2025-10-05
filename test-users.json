@@ -1,0 +1,20 @@
+[
+  {
+    "localId": "testadmin123",
+    "email": "admin@local.test",
+    "emailVerified": true,
+    "passwordHash": "fakeHash",
+    "salt": "fakeSalt",
+    "displayName": "Admin User",
+    "createdAt": "1698245600000",
+    "lastSignedInAt": "1698245600000",
+    "providerUserInfo": [
+      {
+        "providerId": "password",
+        "email": "admin@local.test",
+        "displayName": "Admin User"
+      }
+    ],
+    "customAttributes": "{\"admin\":true,\"role\":\"admin\"}"
+  }
+]

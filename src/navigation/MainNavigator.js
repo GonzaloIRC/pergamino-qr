@@ -8,6 +8,13 @@ import ScannerScreen from '../screens/main/ScannerScreen';
 import ProfileScreen from '../screens/main/ProfileScreen';
 import SettingsScreen from '../screens/main/SettingsScreen';
 
+// Importamos pantallas de seguimiento
+import TrackingDashboard from '../screens/TrackingDashboard';
+import TrackingTableSetup from '../screens/TrackingTableSetup';
+
+// Componentes de Tracking Table
+import TrackingForm from '../components/TrackingTable/TrackingForm';
+
 // Tabs
 const Tab = createBottomTabNavigator();
 
@@ -22,6 +29,8 @@ function MainTabs() {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'Scanner') {
             iconName = focused ? 'qr-code' : 'qr-code-outline';
+          } else if (route.name === 'Tracking') {
+            iconName = focused ? 'analytics' : 'analytics-outline';
           } else if (route.name === 'Profile') {
             iconName = focused ? 'person' : 'person-outline';
           } else if (route.name === 'Settings') {
@@ -36,6 +45,13 @@ function MainTabs() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Scanner" component={ScannerScreen} />
+      <Tab.Screen
+        name="Tracking"
+        component={TrackingDashboard}
+        options={{
+          title: 'Seguimiento',
+        }}
+      />
       <Tab.Screen name="Profile" component={ProfileScreen} />
       <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
@@ -53,7 +69,42 @@ export default function MainNavigator() {
         component={MainTabs}
         options={{ headerShown: false }}
       />
-      {/* Add more screens here that are accessible from tabs */}
+      <Stack.Screen
+        name="TrackingTableSetup"
+        component={TrackingTableSetup}
+        options={{
+          title: 'Configurar Mesa de Seguimiento',
+        }}
+      />
+      <Stack.Screen
+        name="TrackingFormScreen"
+        component={TrackingFormScreen}
+        options={{
+          title: 'Nuevo Registro',
+        }}
+      />
     </Stack.Navigator>
+  );
+}
+
+// Pantalla contenedora para el formulario
+function TrackingFormScreen({ route, navigation }) {
+  const { tableId, initialData } = route.params || {};
+
+  const handleSuccess = () => {
+    navigation.navigate('Tracking');
+  };
+
+  const handleCancel = () => {
+    navigation.goBack();
+  };
+
+  return (
+    <TrackingForm
+      tableId={tableId}
+      initialData={initialData}
+      onSuccess={handleSuccess}
+      onCancel={handleCancel}
+    />
   );
 }

@@ -2,6 +2,16 @@
 
 Todas las modificaciones notables al proyecto serán documentadas en este archivo.
 
+## [Unreleased]
+
+### Added
+- Dashboard admin con KPIs en tiempo real (Firestore).
+- Módulo History con filtros por fecha/DNI/serial y exportación CSV.
+- Data-testid en componentes clave para E2E.
+
+### CI
+- Ajustes menores para estabilidad E2E.
+
 ## [1.1.0] - M1 - En desarrollo
 
 ### Nuevas Características

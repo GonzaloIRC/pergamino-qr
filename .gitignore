@@ -18,7 +18,14 @@ dist-ssr
 .env
 .env.*
 !.env.example
+!.env.test.example
 serviceAccount*.json
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
 !serviceAccount*.example.json
 *credentials*.json
 *.secret*
