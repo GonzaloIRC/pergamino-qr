@@ -1,24 +1,24 @@
-<#
+﻿<#
 Uso
-----
+--
 1) Guarda este archivo como: tools/pack-mobile-context.ps1
-2) Ejecuta en PowerShell (desde la raíz del repo Expo/RN):
+2) Ejecuta en PowerShell (desde la raÃ­z del repo Expo/RN):
    pwsh -NoProfile -ExecutionPolicy Bypass -File .\tools\pack-mobile-context.ps1 -Root . -OutZip pergamino-mobile-context.zip
-3) Sube el ZIP resultante aquí.
+3) Sube el ZIP resultante aquÃ­.
 
-Qué incluye (si existe)
------------------------
+QuÃ© incluye (si existe)
+------------
 - package.json, app.config.ts, index.js, App.js
 - metro.config.js, jest.config.*, eas.json, tsconfig.json
-- src/components/BarcodeScanner/**/* (migración a expo-camera)
+- src/components/BarcodeScanner/**/* (migraciÃ³n a expo-camera)
 - android/build.gradle, android/app/build.gradle, android/gradle/wrapper/gradle-wrapper.properties
 - android/app/src/main/AndroidManifest.xml
 - android/app/src/main/java/**/MainActivity.kt (+ MainApplication.kt si existe)
 - .env.local y .env.staging **saneados (valores = REDACTED)**
-- logs/expo-run-android.txt (si existe) + copia truncada a 200 líneas
+- logs/expo-run-android.txt (si existe) + copia truncada a 200 lÃ­neas
 
-Por qué
--------
+Por quÃ©
+----
 - Recolectar exactamente los artefactos que necesito para diagnosticar builds sin exponer secretos.
 #>
 
@@ -53,7 +53,7 @@ function Add-Glob {
 
 function Sanitize-EnvFile {
   param([string]$Path)
-  # Por qué: evitar exponer secretos; mantener solo claves.
+  # Por quÃ©: evitar exponer secretos; mantener solo claves.
   $lines = Get-Content -Path $Path -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
   if (-not $lines) { return }
   $san = @()
@@ -67,7 +67,7 @@ function Sanitize-EnvFile {
 $Staging = New-TempDir
 $Missing = @()
 
-# Núcleo
+# NÃºcleo
 $include = @(
   'package.json',
   'app.config.ts',
@@ -107,7 +107,7 @@ foreach ($e in $envs) {
   } else { $Missing += $e }
 }
 
-# Logs (opcional): incluir archivo completo y una versión truncada si existe
+# Logs (opcional): incluir archivo completo y una versiÃ³n truncada si existe
 $logSrc = Join-Path $Root 'logs/expo-run-android.txt'
 if (Test-Path $logSrc) {
   $logDest = Join-Path $Staging 'logs/expo-run-android.txt'
@@ -124,7 +124,7 @@ if ($Missing.Count -gt 0) {
   $Missing | Add-Content -Path $missPath
 }
 
-# Excluir basura común
+# Excluir basura comÃºn
 $excludes = @('.git', 'node_modules', '.gradle', 'android/.gradle', 'android/build', 'dist', 'build')
 
 # Comprimir
@@ -132,5 +132,5 @@ if (Test-Path $OutZip) { Remove-Item $OutZip -Force }
 Compress-Archive -Path (Get-ChildItem $Staging -Recurse | Where-Object { $_.PSIsContainer -eq $false -and ($excludes -notcontains $_.Name) } | ForEach-Object { $_.FullName }) `
                  -DestinationPath $OutZip -CompressionLevel Optimal
 
-Write-Host '✔ ZIP listo:' (Resolve-Path $OutZip).Path
+Write-Host 'âœ” ZIP listo:' (Resolve-Path $OutZip).Path
 Write-Host ('Staging: ' + $Staging)

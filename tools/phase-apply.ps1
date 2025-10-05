@@ -1,4 +1,4 @@
-param(
+﻿param(
   [ValidateSet('M1','M2','M3','All')] [string]$Phase = 'All',
   [string]$BranchPrefix = 'fix'
 )
@@ -11,22 +11,22 @@ function Ok($m){ Write-Host "OK  $m" -ForegroundColor Green }
 function Warn($m){ Write-Host "!!  $m" -ForegroundColor Yellow }
 
 # 0) Guardas estado git y creas rama
-git rev-parse --is-inside-work-tree *> $null
+git rev-parse -is-inside-work-tree *> $null
 if($LASTEXITCODE -ne 0){ throw "No es repo Git." }
-$curBranch = (git rev-parse --abbrev-ref HEAD).Trim()
+$curBranch = (git rev-parse -abbrev-ref HEAD).Trim()
 
 # Verificar si hay cambios sin commitar en la rama actual
-$changes = (git status --porcelain).Length
+$changes = (git status -porcelain).Length
 if ($changes -gt 0) {
     Warn "Hay cambios sin commitar en la rama actual ($curBranch). Se recomienda hacer commit o stash primero."
-    $confirm = Read-Host "¿Deseas continuar de todos modos? (S/N)"
+    $confirm = Read-Host "Â¿Deseas continuar de todos modos? (S/N)"
     if ($confirm -ne "S" -and $confirm -ne "s") {
-        throw "Operación cancelada por el usuario."
+        throw "OperaciÃ³n cancelada por el usuario."
     }
 }
 
 $newBranch = if($Phase -eq 'All') { "$BranchPrefix/phases-m1-m3" } else { "$BranchPrefix/$Phase" }
-W "Cambiando de rama $curBranch a $newBranch..."
+W "Cambiando de rama $curBranch a $newBranch...."
 git checkout -b $newBranch
 
 # 1) Asegura carpetas
@@ -45,7 +45,7 @@ foreach($hit in $dups){
   if(Test-Path $p){ Rename-Item -Force -Path $p -NewName ($p + ".bak") }
 }
 
-# 3) Escribe firebaseClient.js (único punto de init + emuladores)
+# 3) Escribe firebaseClient.js (Ãºnico punto de init + emuladores)
 @"
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
@@ -64,7 +64,7 @@ const cfg = {
 
 export const app = getApps().length ? getApp() : initializeApp(cfg);
 
-// Auth con persistencia RN; fallback si ya está inicializado
+// Auth con persistencia RN; fallback si ya estÃ¡ inicializado
 let auth;
 try {
   auth = initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) });
@@ -90,7 +90,7 @@ export function enableEmulatorsIfNeeded() {
 # 4) Contextos + Guards
 @"
 import React, { createContext, useState, useEffect } from 'react';
-import { auth, db, enableEmulatorsIfNeeded } from '../services/firebaseClient';
+import { auth, db, enableEmulatorsIfNeeded } from '.../services/firebaseClient';
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 
@@ -151,26 +151,26 @@ export function useTheme(){ return useContext(ThemeContext); }
 @"
 import React, { useContext } from 'react';
 import { View, Text, Button } from 'react-native';
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext } from '.../context/AuthContext';
 
 export function RequireAuth(Component){
   return function Wrapper(props){
     const { isAuthenticated, loading } = useContext(AuthContext);
-    if(loading) return <Text>Cargando...</Text>;
+    if(loading) return <Text>Cargando....</Text>;
     if(!isAuthenticated){
       return <View style={{padding:16}}>
-        <Text>Acceso denegado: inicia sesión.</Text>
+        <Text>Acceso denegado: inicia sesiÃ³n.</Text>
         <Button title='Ir a Login' onPress={() => props.navigation.replace('Login')} />
       </View>;
     }
-    return <Component {...props} />;
+    return <Component {....props} />;
   }
 }
 
 export function RequireRole(roles, Component){
   return function Wrapper(props){
     const { isAuthenticated, userRole, loading } = useContext(AuthContext);
-    if(loading) return <Text>Cargando...</Text>;
+    if(loading) return <Text>Cargando....</Text>;
     if(!isAuthenticated){ 
       return <View style={{padding:16}}>
         <Text>Acceso denegado.</Text>
@@ -182,12 +182,12 @@ export function RequireRole(roles, Component){
         <Text>Rol insuficiente.</Text>
       </View>;
     }
-    return <Component {...props} />;
+    return <Component {....props} />;
   }
 }
 "@ | Set-Content -Encoding UTF8 -Path "src/navigation/RouteGuards.js"
 
-# 5) Navigator + pantallas mínimas
+# 5) Navigator + pantallas mÃ­nimas
 @"
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
@@ -196,17 +196,17 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import { RequireAuth, RequireRole } from './RouteGuards';
 
-import LoginScreen from '../screens/LoginScreen';
-import RegisterScreen from '../screens/RegisterScreen';
-import AdminDashboard from '../screens/AdminDashboard';
-import WaiterDashboard from '../screens/WaiterDashboard';
-import CustomerDashboard from '../screens/CustomerDashboard';
-import Onboarding from '../screens/Onboarding';
-import Settings from '../screens/Settings';
-import Campaigns from '../screens/Campaigns';
-import Customers from '../screens/Customers';
-import Reports from '../screens/Reports';
-import Landing from '../screens/marketing/Landing';
+import LoginScreen from '.../screens/LoginScreen';
+import RegisterScreen from '.../screens/RegisterScreen';
+import AdminDashboard from '.../screens/AdminDashboard';
+import WaiterDashboard from '.../screens/WaiterDashboard';
+import CustomerDashboard from '.../screens/CustomerDashboard';
+import Onboarding from '.../screens/Onboarding';
+import Settings from '.../screens/Settings';
+import Campaigns from '.../screens/Campaigns';
+import Customers from '.../screens/Customers';
+import Reports from '.../screens/Reports';
+import Landing from '.../screens/marketing/Landing';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -242,8 +242,8 @@ export default function AppNavigator(){
 
 # 6) Stubs de pantallas (evita errores de import)
 $stubs = @{
-  "src/screens/LoginScreen.js" = "import React,{useState,useContext} from 'react'; import {View,Text,TextInput,Button} from 'react-native'; import {AuthContext} from '../context/AuthContext'; export default function LoginScreen({navigation}){ const {login}=useContext(AuthContext); const [email,setEmail]=useState(''); const [pass,setPass]=useState(''); return <View style={{padding:16,gap:8}}><Text>Login</Text><TextInput placeholder='email' value={email} onChangeText={setEmail} style={{borderWidth:1,padding:8}}/><TextInput placeholder='password' value={pass} onChangeText={setPass} secureTextEntry style={{borderWidth:1,padding:8}}/><Button title='Entrar' onPress={async()=>{ await login(email,pass); navigation.replace('MainTabs'); }} /><Button title='Registrarme' onPress={()=>navigation.navigate('Register')} /></View>; }";
-  "src/screens/RegisterScreen.js" = "import React,{useState,useContext} from 'react'; import {View,Text,TextInput,Button} from 'react-native'; import {AuthContext} from '../context/AuthContext'; export default function RegisterScreen({navigation}){ const {register}=useContext(AuthContext); const [email,setEmail]=useState(''); const [pass,setPass]=useState(''); return <View style={{padding:16,gap:8}}><Text>Registro</Text><TextInput placeholder='email' value={email} onChangeText={setEmail} style={{borderWidth:1,padding:8}}/><TextInput placeholder='password' value={pass} onChangeText={setPass} secureTextEntry style={{borderWidth:1,padding:8}}/><Button title='Crear' onPress={async()=>{ await register(email,pass); navigation.replace('MainTabs'); }} /></View>; }";
+  "src/screens/LoginScreen.js" = "import React,{useState,useContext} from 'react'; import {View,Text,TextInput,Button} from 'react-native'; import {AuthContext} from '.../context/AuthContext'; export default function LoginScreen({navigation}){ const {login}=useContext(AuthContext); const [email,setEmail]=useState(''); const [pass,setPass]=useState(''); return <View style={{padding:16,gap:8}}><Text>Login</Text><TextInput placeholder='email' value={email} onChangeText={setEmail} style={{borderWidth:1,padding:8}}/><TextInput placeholder='password' value={pass} onChangeText={setPass} secureTextEntry style={{borderWidth:1,padding:8}}/><Button title='Entrar' onPress={async()=>{ await login(email,pass); navigation.replace('MainTabs'); }} /><Button title='Registrarme' onPress={()=>navigation.navigate('Register')} /></View>; }";
+  "src/screens/RegisterScreen.js" = "import React,{useState,useContext} from 'react'; import {View,Text,TextInput,Button} from 'react-native'; import {AuthContext} from '.../context/AuthContext'; export default function RegisterScreen({navigation}){ const {register}=useContext(AuthContext); const [email,setEmail]=useState(''); const [pass,setPass]=useState(''); return <View style={{padding:16,gap:8}}><Text>Registro</Text><TextInput placeholder='email' value={email} onChangeText={setEmail} style={{borderWidth:1,padding:8}}/><TextInput placeholder='password' value={pass} onChangeText={setPass} secureTextEntry style={{borderWidth:1,padding:8}}/><Button title='Crear' onPress={async()=>{ await register(email,pass); navigation.replace('MainTabs'); }} /></View>; }";
   "src/screens/AdminDashboard.js" = "import React from 'react'; import {View,Text} from 'react-native'; export default function AdminDashboard(){ return <View style={{padding:16}}><Text>Admin</Text></View>; }";
   "src/screens/WaiterDashboard.js" = "import React from 'react'; import {View,Text} from 'react-native'; export default function WaiterDashboard(){ return <View style={{padding:16}}><Text>Mesero</Text></View>; }";
   "src/screens/CustomerDashboard.js" = "import React from 'react'; import {View,Text} from 'react-native'; export default function CustomerDashboard(){ return <View style={{padding:16}}><Text>Cliente</Text></View>; }";
@@ -288,7 +288,7 @@ module.exports = function (api) {
 @"
 const { getDefaultConfig } = require('expo/metro-config');
 const config = getDefaultConfig(__dirname);
-config.resolver = { ...config.resolver, resolverMainFields: ['react-native','browser','main'] };
+config.resolver = { ....config.resolver, resolverMainFields: ['react-native','browser','main'] };
 module.exports = config;
 "@ | Set-Content -Encoding UTF8 -Path "metro.config.js"
 
@@ -311,7 +311,7 @@ EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID=G-GT982TM94R
 $envContent | Set-Content -Encoding UTF8 -Path ".env.local"
 
 # 10) Dependencias compatibles (usar expo install siempre que aplique)
-W "Instalando dependencias (esto tarda)..."
+W "Instalando dependencias (esto tarda)...."
 npx expo install @react-native-async-storage/async-storage react-native-screens react-native-safe-area-context react-native-svg
 npx expo install @react-navigation/native @react-navigation/native-stack @react-navigation/bottom-tabs
 npm i -E react-native-paper@^5
@@ -320,12 +320,12 @@ npx expo install expo-notifications expo-location
 
 # 11) Commit
 git add -A
-git commit -m "M1–M3 base: navegación, contextos, firebaseClient único, stubs de pantallas, env, babel/metro [desde rama $curBranch]"
+git commit -m "M1â€“M3 base: navegaciÃ³n, contextos, firebaseClient Ãºnico, stubs de pantallas, env, babel/metro [desde rama $curBranch]"
 
 Write-Host "Fase $Phase aplicada en rama $newBranch" -ForegroundColor Green
 $msg1 = "`nSiguiente:"
 Write-Host $msg1 -ForegroundColor Cyan
 $msg2 = "  git push -u origin $newBranch"
 Write-Host $msg2 -ForegroundColor White
-$msg3 = "  (opcional) gh pr create --fill --base main"
+$msg3 = "  (opcional) gh pr create -fill -base main"
 Write-Host $msg3 -ForegroundColor White

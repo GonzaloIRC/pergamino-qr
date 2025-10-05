@@ -1,4 +1,4 @@
-# Build Sherpa - Pergamino App (ASCII-safe)
+﻿# Build Sherpa - Pergamino App (ASCII-safe)
 # Uso:
 #   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\bootstrap-and-pack.ps1 -Emulator Pixel_4_API_33
 param([string]$Emulator = "Pixel_4_API_33")
@@ -38,8 +38,8 @@ function DepExists($j,$n){
   return (($j.dependencies -and $j.dependencies.PSObject.Properties.Name -contains $n) -or
           ($j.devDependencies -and $j.devDependencies.PSObject.Properties.Name -contains $n))
 }
-if(DepExists $pkg 'expo-barcode-scanner'){ Info 'Removing expo-barcode-scanner'; & npm uninstall expo-barcode-scanner --silent }
-if(DepExists $pkg 'expo-barcode-scanner-interface'){ Info 'Removing expo-barcode-scanner-interface'; & npm uninstall expo-barcode-scanner-interface --silent }
+if(DepExists $pkg 'expo-barcode-scanner'){ Info 'Removing expo-barcode-scanner'; & npm uninstall expo-barcode-scanner -silent }
+if(DepExists $pkg 'expo-barcode-scanner-interface'){ Info 'Removing expo-barcode-scanner-interface'; & npm uninstall expo-barcode-scanner-interface -silent }
 if(-not (DepExists $pkg 'expo-camera')){ Info 'Installing expo-camera@^16'; & npm i -E expo-camera@^16 }
 
 # 3) Entry points (create minimal if missing)
@@ -93,9 +93,9 @@ Info 'Install dependencies'
 if(Test-Path 'package-lock.json'){ & npm ci } else { & npm install }
 
 # 5) Prebuild clean (regenerate android)
-Info 'Regenerate Android project (prebuild --clean)'
+Info 'Regenerate Android project (prebuild -clean)'
 if(Test-Path 'android'){ Remove-Item -Recurse -Force -Path 'android' }
-& npx expo prebuild --clean --platform android --non-interactive
+& npx expo prebuild -clean -platform android -non-interactive
 
 if(Test-Path 'android\gradlew.bat'){
   Push-Location android

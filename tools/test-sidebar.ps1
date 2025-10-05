@@ -1,0 +1,237 @@
+﻿<#
+.SYNOPSIS
+    Prueba la funcionalidad de navegaciÃ³n en la barra lateral (sidebar).
+
+.DESCRIPTION
+    Este script ejecuta pruebas E2E especÃ­ficas para la navegaciÃ³n en la barra lateral
+    de la aplicaciÃ³n web administrativa de Pergamino, verificando que todos los elementos
+    de navegaciÃ³n funcionen correctamente.
+
+.PARAMETER Headless
+    Ejecuta las pruebas en modo headless (sin interfaz grÃ¡fica). Por defecto es $true.
+
+.PARAMETER Browser
+    Especifica el navegador a utilizar: chromium, firefox o webkit. Por defecto es "chromium".
+
+.PARAMETER GenerateReport
+    Genera un reporte HTML detallado de la ejecuciÃ³n.
+
+.EXAMPLE
+    .\test-sidebar.ps1
+    Ejecuta la prueba de sidebar en modo headless usando chromium.
+
+.EXAMPLE
+    .\test-sidebar.ps1 -Headless $false -Browser "firefox"
+    Ejecuta la prueba de sidebar mostrando la interfaz grÃ¡fica en Firefox.
+
+.EXAMPLE
+    .\test-sidebar.ps1 -GenerateReport
+    Ejecuta la prueba y genera un reporte HTML detallado.
+#>
+
+Param(
+    [bool]$Headless = $true,
+    [string]$Browser = "chromium",
+    [switch]$GenerateReport
+)
+
+# ConfiguraciÃ³n de colores para la consola
+$colorReset = "$([char]27)[0m"
+$colorBright = "$([char]27)[1m"
+$colorRed = "$([char]27)[31m"
+$colorGreen = "$([char]27)[32m"
+$colorYellow = "$([char]27)[33m"
+$colorBlue = "$([char]27)[34m"
+$colorCyan = "$([char]27)[36m"
+
+# Banner
+Write-Host "$colorCyan$colorBright==============================================$colorReset"
+Write-Host "$colorCyan$colorBright Prueba E2E - NavegaciÃ³n de Barra Lateral $colorReset"
+Write-Host "$colorCyan$colorBright==============================================$colorReset"
+Write-Host ""
+
+# Directorio de pruebas E2E
+$e2eDir = Join-Path (Get-Location) "apps/admin-web/e2e"
+$testFile = Join-Path $e2eDir "sidebar-navigation.spec.js"
+
+# Verificar que el archivo de prueba existe, si no, crearlo
+if (-not (Test-Path $testFile)) {
+    Write-Host "$colorYellow>> Creando archivo de prueba para la navegaciÃ³n del sidebar....$colorReset"
+    
+    # Crear el directorio si no existe
+    if (-not (Test-Path $e2eDir)) {
+        New-Item -ItemType Directory -Path $e2eDir -Force | Out-Null
+    }
+    
+    # Contenido del archivo de prueba
+    $testContent = @"
+import { test, expect } from '@playwright/test';
+
+test.describe('Sidebar Navigation', () => {
+  test.beforeEach(async ({ page }) => {
+    // Login before each test
+    await page.goto('/login');
+    await page.fill('input[name="email"]', process.env.TEST_USER_EMAIL || 'admin@pergamino.test');
+    await page.fill('input[name="password"]', process.env.TEST_USER_PASSWORD || 'test1234');
+    await page.click('button[type="submit"]');
+    
+    // Wait for login to complete
+    await page.waitForURL('/dashboard');
+  });
+  
+  test('should display the sidebar with all navigation items', async ({ page }) => {
+    await page.goto('/dashboard');
+    
+    // Check that sidebar exists
+    await expect(page.locator('[data-testid="sidebar"]')).toBeVisible();
+    
+    // Check that it contains all required navigation links
+    await expect(page.locator('[data-testid="sidebar-nav-dashboard"]')).toBeVisible();
+    await expect(page.locator('[data-testid="sidebar-nav-history"]')).toBeVisible();
+    await expect(page.locator('[data-testid="sidebar-nav-tables"]')).toBeVisible();
+    await expect(page.locator('[data-testid="sidebar-nav-customers"]')).toBeVisible();
+    await expect(page.locator('[data-testid="sidebar-nav-reports"]')).toBeVisible();
+    await expect(page.locator('[data-testid="sidebar-nav-settings"]')).toBeVisible();
+  });
+
+  test('should navigate between sidebar items correctly', async ({ page }) => {
+    await page.goto('/dashboard');
+    
+    // Test navigation to history
+    await page.click('[data-testid="sidebar-nav-history"]');
+    await expect(page).toHaveURL(/.*history/);
+    await expect(page.locator('[data-testid="history-container"]')).toBeVisible();
+    
+    // Test navigation to tables
+    await page.click('[data-testid="sidebar-nav-tables"]');
+    await expect(page).toHaveURL(/.*tables/);
+    await expect(page.locator('[data-testid="tables-container"]')).toBeVisible();
+    
+    // Test navigation to customers
+    await page.click('[data-testid="sidebar-nav-customers"]');
+    await expect(page).toHaveURL(/.*customers/);
+    await expect(page.locator('[data-testid="customers-container"]')).toBeVisible();
+    
+    // Test navigation to reports
+    await page.click('[data-testid="sidebar-nav-reports"]');
+    await expect(page).toHaveURL(/.*reports/);
+    await expect(page.locator('[data-testid="reports-container"]')).toBeVisible();
+    
+    // Test navigation to settings
+    await page.click('[data-testid="sidebar-nav-settings"]');
+    await expect(page).toHaveURL(/.*settings/);
+    await expect(page.locator('[data-testid="settings-container"]')).toBeVisible();
+    
+    // Test navigation back to dashboard
+    await page.click('[data-testid="sidebar-nav-dashboard"]');
+    await expect(page).toHaveURL(/.*dashboard/);
+    await expect(page.locator('[data-testid="dashboard-container"]')).toBeVisible();
+  });
+
+  test('should highlight active navigation item', async ({ page }) => {
+    // Navigate to various pages and check active state
+    
+    // Dashboard
+    await page.goto('/dashboard');
+    await expect(page.locator('[data-testid="sidebar-nav-dashboard"]')).toHaveClass(/active/);
+    
+    // History
+    await page.goto('/history');
+    await expect(page.locator('[data-testid="sidebar-nav-history"]')).toHaveClass(/active/);
+    
+    // Tables
+    await page.goto('/tables');
+    await expect(page.locator('[data-testid="sidebar-nav-tables"]')).toHaveClass(/active/);
+  });
+
+  test('should collapse sidebar on mobile view', async ({ page }) => {
+    // Set viewport to mobile size
+    await page.setViewportSize({ width: 480, height: 720 });
+    await page.goto('/dashboard');
+    
+    // Verify sidebar starts in collapsed state
+    const sidebarCollapsed = await page.evaluate(() => {
+      const sidebar = document.querySelector('[data-testid="sidebar"]');
+      return getComputedStyle(sidebar).transform !== 'none' || 
+             getComputedStyle(sidebar).left === '-250px' ||
+             sidebar.classList.contains('collapsed');
+    });
+    
+    expect(sidebarCollapsed).toBeTruthy();
+    
+    // Click hamburger menu to expand
+    await page.click('[data-testid="hamburger-menu"]');
+    
+    // Verify sidebar is expanded
+    const sidebarExpanded = await page.evaluate(() => {
+      const sidebar = document.querySelector('[data-testid="sidebar"]');
+      return getComputedStyle(sidebar).transform === 'none' && 
+             getComputedStyle(sidebar).left !== '-250px' &&
+             !sidebar.classList.contains('collapsed');
+    });
+    
+    expect(sidebarExpanded).toBeTruthy();
+  });
+});
+"@
+    
+    # Escribir el archivo
+    Set-Content -Path $testFile -Value $testContent
+    Write-Host "$colorGreenâœ“ Archivo de prueba creado: $testFile$colorReset"
+}
+
+# Construir los argumentos para Playwright
+$playwrightArgs = @("test", $testFile)
+$playwrightArgs += "--project=$Browser"
+
+if ($Headless) {
+    Write-Host "$colorBlue>> Ejecutando prueba en modo headless con $Browser....$colorReset"
+}
+else {
+    Write-Host "$colorBlue>> Ejecutando prueba con interfaz grÃ¡fica en $Browser....$colorReset"
+    $playwrightArgs += "--headed"
+}
+
+if ($GenerateReport) {
+    $reportDir = Join-Path (Get-Location) "playwright-report-sidebar"
+    $playwrightArgs += "-reporter=html"
+    $playwrightArgs += "-output=$reportDir"
+    Write-Host "$colorYellow>> Se generarÃ¡ un reporte HTML en: $reportDir$colorReset"
+}
+
+# Añadir la configuración sin servidor
+$playwrightArgs += "--config=playwright.config.noserver.js"
+
+# Mostrar el comando a ejecutar
+$cmdDisplay = "npx playwright " + ($playwrightArgs -join " ")
+Write-Host "$colorCyan>> Ejecutando: $cmdDisplay$colorReset"
+
+# Ejecutar Playwright
+try {
+    & npx playwright @playwrightArgs
+    
+    # Verificar el resultado
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "$colorGreenâœ“ Prueba de navegaciÃ³n de sidebar exitosa$colorReset"
+        
+    if ($GenerateReport) {
+        Write-Host "$colorGreenâœ“ Reporte HTML generado en: $reportDir$colorReset"
+            Write-Host "$colorYellow  Puedes abrirlo con: npx playwright show-report $reportDir$colorReset"
+        }
+    }
+    else {
+        Write-Host "$colorRedâŒ La prueba ha fallado con cÃ³digo: $LASTEXITCODE$colorReset"
+        
+        if ($GenerateReport) {
+            Write-Host "$colorYellow  Puedes revisar los detalles en: $reportDir$colorReset"
+            Write-Host "$colorYellow  Abre el reporte con: npx playwright show-report $reportDir$colorReset"
+        }
+        else {
+            Write-Host "$colorYellow  Ejecuta con -GenerateReport para obtener un reporte detallado$colorReset"
+        }
+    }
+}
+catch {
+    Write-Host "$colorRedâŒ Error al ejecutar la prueba: $($_.ToString())$colorReset"
+    exit 1
+}
